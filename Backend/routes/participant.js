@@ -7,7 +7,7 @@ const Group = require("../models/group");
 const Event = require("../models/event");
 const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const {
       ParticipantName,
@@ -21,7 +21,19 @@ router.post("/", authMiddleware, async (req, res) => {
     } = req.body;
 
     if (!ParticipantName || !ParticipantEnrollmentNumber || !GroupID) {
-      return res.status(400).json({ message: "Required fields missing" });
+      return res.status(400).json({ message: "Participant Name, Enrollment Number, and Group ID are required" });
+    }
+
+    // Check if participant with this enrollment number already exists
+    const existingParticipant = await Participant.findOne({ ParticipantEnrollmentNumber });
+    if (existingParticipant) {
+      return res.status(400).json({ message: `Participant with enrollment number ${ParticipantEnrollmentNumber} is already registered.` });
+    }
+
+    // Validate if Group exists
+    const groupExists = await Group.findById(GroupID);
+    if (!groupExists) {
+      return res.status(404).json({ message: "The specified group does not exist." });
     }
 
     const participant = await Participant.create({
@@ -31,23 +43,39 @@ router.post("/", authMiddleware, async (req, res) => {
       ParticipantCity,
       ParticipantMobile,
       ParticipantEmail,
-      IsGroupLeader,
+      IsGroupLeader: IsGroupLeader || false,
       GroupID,
-      ModifiedBy: req.user._id
+      ModifiedBy: req.user?._id
     });
 
-    res.status(201).json({ message: "Participant added successfully", participant });
+    res.status(201).json({ 
+      message: "Participant registered successfully!", 
+      participant 
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Error in participant registration:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
 router.get("/", async (req, res) => {
   try {
-    const participants = await Participant.find();
+    const participants = await Participant.find()
+      .populate({
+        path: 'GroupID',
+        populate: {
+          path: 'EventID',
+          populate: {
+            path: 'DepartmentID',
+            populate: {
+              path: 'InstituteID'
+            }
+          }
+        }
+      });
     res.status(200).json({ participants });
   } catch (err) {
+    console.error("Error fetching participants:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -150,12 +178,14 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     }
 
     const isEventCoOrdinator = event.EventCoOrdinatorID.toString() === userId.toString();
-    if (!isGroupLeader && !isEventCoOrdinator) {
-      return res.status(403).json({ message: "Unauthorized" });
+    // Simplified: If user is an Admin, they can delete anything. 
+    // Otherwise, check if they are the creator/coordinator.
+    if (req.user.isAdmin || isGroupLeader || isEventCoOrdinator) {
+      const deletedParticipant = await Participant.findByIdAndDelete(id);
+      return res.status(200).json({ message: "Participant deleted successfully", deletedParticipant });
     }
 
-    const deletedParticipant = await Participant.findByIdAndDelete(id);
-    res.status(200).json({ message: "Participant deleted successfully", deletedParticipant });
+    res.status(403).json({ message: "Unauthorized to delete this participant" });
 
   }
   catch (err) {

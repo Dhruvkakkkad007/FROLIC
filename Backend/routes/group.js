@@ -5,7 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const { default: mongoose } = require("mongoose");
 const Participant=require("../models/participant");
 
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", async (req, res) => {
     try {
         const { GroupName, EventID } = req.body;
         if (!GroupName || !EventID) {
@@ -15,7 +15,7 @@ router.post("/", authMiddleware, async (req, res) => {
         const group = await Group.create({
             GroupName,
             EventID,
-            ModifiedBy: req.user.id
+            ModifiedBy: req.user?.id || req.user?._id
         });
 
         res.status(201).json({ message: "Group created successfully", group });

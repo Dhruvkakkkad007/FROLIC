@@ -18,9 +18,14 @@ const Login = () => {
         setError('');
         setLoading(true);
         try {
-            await login(formData);
-            navigate('/');
+            const userData = await login(formData);
+            if (userData?.isAdmin) {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
+
             setError(err.response?.data?.message || 'Failed to sign in');
         } finally {
             setLoading(false);

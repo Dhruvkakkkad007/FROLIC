@@ -15,6 +15,7 @@ import ManageData from './pages/Admin/ManageData';
 import AddGroup from './pages/Admin/AddGroup';
 import AddParticipant from './pages/Admin/AddParticipant';
 import AdminDashboard from './pages/Admin/AdminDashboard';
+import AllParticipants from './pages/Admin/AllParticipants';
 
 import { AuthProvider } from './context/AuthContext';
 
@@ -44,6 +45,7 @@ function App() {
                 <Route path="add-institute" element={<AddInstitute />} />
                 <Route path="add-department" element={<AddDepartment />} />
                 <Route path="add-event" element={<AddEvent />} />
+                <Route path="participants" element={<AllParticipants />} />
               </Route>
             </Route>
           </Route>

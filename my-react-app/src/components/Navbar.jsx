@@ -35,11 +35,24 @@ const Navbar = () => {
 
     const adminLinks = [
         { name: 'Admin Dashboard', path: '/admin/dashboard' },
-        { name: 'Institutes', path: '/admin/manage?tab=institutes' },
+        { name: 'Participants', path: '/admin/participants' },
         { name: 'Departments', path: '/admin/manage?tab=departments' },
-        { name: 'Manage All', path: '/admin/manage' },
-        { name: 'Add Event', path: '/admin/add-event' },
+        { name: 'Events', path: '/admin/manage?tab=events' },
+        { name: 'Institute', path: '/admin/manage?tab=institutes' },
+        { name: 'ManageAll', path: '/admin/manage' },
     ];
+
+    const isAdminPath = location.pathname.startsWith('/admin');
+    const currentLinks = (user?.isAdmin && isAdminPath) ? adminLinks : navLinks;
+
+    const isActive = (path) => {
+        if (path === '/') return location.pathname === '/' && !location.hash;
+        if (path.startsWith('/#')) return location.hash === path.substring(1);
+        if (path.includes('?')) return (location.pathname + location.search).includes(path);
+        // Special case for ManageAll to not be active when a specific tab is selected
+        if (path === '/admin/manage') return location.pathname === path && !location.search;
+        return location.pathname === path;
+    };
 
     const handleNavLinkClick = (e, path) => {
         if (path === '/' || path.startsWith('/#')) {
@@ -51,7 +64,6 @@ const Navbar = () => {
                     element.scrollIntoView({ behavior: 'smooth' });
                 }
             } else if (path.startsWith('/#')) {
-                // Let the normal Link behavior happen, then scroll after transition
                 setTimeout(() => {
                     const element = document.getElementById(id);
                     if (element) {
@@ -66,7 +78,8 @@ const Navbar = () => {
     return (
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass py-3 shadow-2xl' : 'bg-transparent py-6'}`}>
             <div className="container mx-auto px-6 flex justify-between items-center h-full">
-                <Link to="/" className="flex items-center gap-2 group">
+                <Link to={user?.isAdmin ? "/admin/dashboard" : "/"} className="flex items-center gap-2 group">
+
                     <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg">
                         <Rocket className="text-white w-6 h-6" />
                     </div>
@@ -77,23 +90,21 @@ const Navbar = () => {
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8">
-                    {navLinks.map((link) => (
+                    {currentLinks.map((link) => (
                         <Link
                             key={link.name}
                             to={link.path}
                             onClick={(e) => handleNavLinkClick(e, link.path)}
                             className={`text-sm font-medium transition-colors hover:text-primary ${
-                                (location.pathname === '/' && link.path === '/') || 
-                                (location.hash === link.path.substring(1)) 
-                                ? 'text-primary' : 'text-gray-300'
+                                isActive(link.path) ? 'text-primary' : 'text-gray-300'
                             }`}
                         >
                             {link.name}
                         </Link>
                     ))}
 
-                    {/* Admin Dropdown - Only for Admins */}
-                    {user?.isAdmin && (
+                    {/* Admin Dropdown - Only for Admins (hidden when already on admin side) */}
+                    {user?.isAdmin && !isAdminPath && (
                         <div className="relative group">
                             <button
                                 className="flex items-center gap-1 text-sm font-medium text-gray-300 hover:text-primary transition-colors"
@@ -162,19 +173,19 @@ const Navbar = () => {
                             </div>
                         )}
 
-                        {navLinks.map((link) => (
+                        {currentLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
                                 onClick={(e) => handleNavLinkClick(e, link.path)}
-                                className={`text-lg font-medium ${location.pathname === link.path ? 'text-primary' : 'text-gray-300'
-                                    }`}
+                                className={`text-lg font-medium ${isActive(link.path) ? 'text-primary' : 'text-gray-300'}`}
                             >
                                 {link.name}
                             </Link>
                         ))}
 
-                        {user?.isAdmin && (
+                        {/* Admin Section (hidden when already on admin side) */}
+                        {user?.isAdmin && !isAdminPath && (
                             <div className="border-t border-white/10 pt-4 mt-2">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 ml-1">Administration</p>
                                 <div className="grid grid-cols-1 gap-4">

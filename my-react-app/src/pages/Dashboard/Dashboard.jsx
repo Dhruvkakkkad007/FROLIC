@@ -1,31 +1,44 @@
 import { useState, useEffect } from 'react';
-import { 
-    Calendar, 
-    MapPin, 
-    Users, 
-    Trophy, 
-    ArrowRight, 
-    Sparkles, 
-    Loader2, 
-    HelpCircle, 
-    ShieldCheck, 
-    Zap, 
-    Mail, 
-    Phone, 
+import {
+    Calendar,
+    MapPin,
+    Users,
+    Trophy,
+    ArrowRight,
+    Sparkles,
+    Loader2,
+    HelpCircle,
+    ShieldCheck,
+    Zap,
+    Mail,
+    Phone,
     Info,
     List,
     Link as LinkIcon
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { eventService, participantService, instituteService, departmentService } from '../../services/api';
+import Modal from '../../components/Modal';
+import EventRegistration from '../Events/EventRegistration';
 
 const Dashboard = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user?.isAdmin) {
+            navigate('/admin/dashboard', { replace: true });
+        }
+    }, [user, navigate]);
+
     const [events, setEvents] = useState([]);
+
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeDept, setActiveDept] = useState('all');
+    const [isRegModalOpen, setIsRegModalOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
     const [stats, setStats] = useState({
         location: 'Darshan University',
         date: '22-24 March 2025',
@@ -69,10 +82,15 @@ const Dashboard = () => {
         fetchData();
     }, []);
 
-    const filteredEvents = activeDept === 'all' 
-        ? events 
+    const filteredEvents = activeDept === 'all'
+        ? events
         : events.filter(e => e.DepartmentID?._id === activeDept || e.DepartmentID === activeDept);
-    
+
+    const handleRegisterClick = (event) => {
+        setSelectedEvent(event);
+        setIsRegModalOpen(true);
+    };
+
     return (
         <div className="space-y-24 pb-20 overflow-x-hidden -mt-24 md:-mt-32">
             {/* Hero Section */}
@@ -105,7 +123,7 @@ const Dashboard = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-700">
-                            <button onClick={() => document.getElementById('events').scrollIntoView({behavior: 'smooth'})} className="btn-primary py-5 px-12 text-lg flex items-center gap-3 group shadow-[0_10px_30px_rgba(233,30,99,0.4)]">
+                            <button onClick={() => document.getElementById('events').scrollIntoView({ behavior: 'smooth' })} className="btn-primary py-5 px-12 text-lg flex items-center gap-3 group shadow-[0_10px_30px_rgba(233,30,99,0.4)]">
                                 <Sparkles size={20} /> Explore Events <ArrowRight className="group-hover:translate-x-1.5 transition-transform" />
                             </button>
                             {!user && (
@@ -143,25 +161,23 @@ const Dashboard = () => {
             <section id="events" className="container mx-auto px-6 scroll-mt-32">
                 <div className="text-center mb-12">
                     <h2 className="text-4xl font-display font-bold text-white mb-6">Our Events</h2>
-                    
+
                     {/* Department Navigation (As per Photo) */}
                     <div className="flex flex-wrap justify-center gap-4 md:gap-8 mb-16 border-b border-white/5 pb-6 overflow-x-auto no-scrollbar">
-                        <button 
+                        <button
                             onClick={() => setActiveDept('all')}
-                            className={`text-sm md:text-base font-bold uppercase tracking-wider transition-all relative ${
-                                activeDept === 'all' ? 'text-primary' : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`text-sm md:text-base font-bold uppercase tracking-wider transition-all relative ${activeDept === 'all' ? 'text-primary' : 'text-gray-400 hover:text-white'
+                                }`}
                         >
                             Show All
                             {activeDept === 'all' && <div className="absolute -bottom-6 left-0 right-0 h-1 bg-primary rounded-full"></div>}
                         </button>
                         {departments.map((dept) => (
-                            <button 
+                            <button
                                 key={dept._id}
                                 onClick={() => setActiveDept(dept._id)}
-                                className={`text-sm md:text-base font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${
-                                    activeDept === dept._id ? 'text-primary' : 'text-gray-400 hover:text-white'
-                                }`}
+                                className={`text-sm md:text-base font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${activeDept === dept._id ? 'text-primary' : 'text-gray-400 hover:text-white'
+                                    }`}
                             >
                                 {dept.DepartmentName}
                                 {activeDept === dept._id && <div className="absolute -bottom-6 left-0 right-0 h-1 bg-primary rounded-full"></div>}
@@ -193,20 +209,23 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 {/* Event Card Content */}
                                 <div className="px-8 pb-8 pt-2 flex flex-col flex-grow text-left">
                                     <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors line-clamp-1">{event.EventName}</h3>
-                                    
+
                                     <p className="text-gray-400 text-sm mb-4">Boys, Girls</p>
                                     <p className="text-gray-400 text-sm font-medium mb-6">{event.EventType || 'Technical'}</p>
-                                    
+
                                     {/* Action Icons */}
                                     <div className="mt-auto flex items-center justify-between text-gray-500">
                                         <button className="hover:text-primary transition-colors">
                                             <List size={22} strokeWidth={1.5} />
                                         </button>
-                                        <button className="hover:text-primary transition-colors">
+                                        <button
+                                            onClick={() => handleRegisterClick(event)}
+                                            className="hover:text-primary transition-colors"
+                                        >
                                             <LinkIcon size={22} strokeWidth={1.5} />
                                         </button>
                                     </div>
@@ -310,12 +329,12 @@ const Dashboard = () => {
             <section id="contact" className="container mx-auto px-6 scroll-mt-32">
                 <div className="glass-dark rounded-[3rem] p-12 border border-white/10 overflow-hidden relative">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10">
                         <div>
                             <h2 className="text-4xl font-display font-bold text-white mb-6">Get in Touch</h2>
                             <p className="text-gray-400 mb-12">Have any questions? Our team is here to help you. Reach out through any of these channels.</p>
-                            
+
                             <div className="space-y-8">
                                 <div className="flex items-center gap-6">
                                     <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center text-primary">
@@ -346,7 +365,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="glass p-8 rounded-[2rem] border border-white/10">
                             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -373,6 +392,20 @@ const Dashboard = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Registration Modal */}
+            <Modal
+                isOpen={isRegModalOpen}
+                onClose={() => setIsRegModalOpen(false)}
+                title="Event Registration"
+            >
+                {selectedEvent && (
+                    <EventRegistration
+                        event={selectedEvent}
+                        onSuccess={() => setIsRegModalOpen(false)}
+                    />
+                )}
+            </Modal>
         </div>
     );
 };

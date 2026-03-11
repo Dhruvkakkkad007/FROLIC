@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { instituteService, departmentService, eventService } from '../../services/api';
-import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus } from 'lucide-react';
+import { instituteService, departmentService, eventService, participantService } from '../../services/api';
+import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon } from 'lucide-react';
 
 const ManageData = () => {
     const location = useLocation();
@@ -10,24 +10,31 @@ const ManageData = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['institutes', 'departments', 'events'].includes(tab)) {
+        if (tab && ['institutes', 'departments', 'events', 'participants'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location]);
 
-    const [data, setData] = useState({ institutes: [], departments: [], events: [] });
+    const [data, setData] = useState({ institutes: [], departments: [], events: [], participants: [] });
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [insts, depts, evts] = await Promise.all([
+            const [insts, depts, evts, parts] = await Promise.all([
                 instituteService.getAll(),
                 departmentService.getAll(),
-                eventService.getAll()
+                eventService.getAll(),
+                participantService.getAll()
             ]);
-            setData({ institutes: insts || [], departments: depts || [], events: evts || [] });
+            
+            setData({ 
+                institutes: insts || [], 
+                departments: depts || [], 
+                events: evts || [],
+                participants: parts || []
+            });
         } catch (err) {
             console.error("Failed to fetch management data", err);
         } finally {
@@ -45,6 +52,7 @@ const ManageData = () => {
                 if (type === 'institute') await instituteService.delete(id);
                 if (type === 'department') await departmentService.delete(id);
                 if (type === 'event') await eventService.delete(id);
+                if (type === 'participant') await participantService.delete(id);
                 fetchData();
             } catch (err) {
                 alert("Deletion failed: " + (err.response?.data?.message || err.message));
@@ -56,6 +64,7 @@ const ManageData = () => {
         { id: 'institutes', label: 'Institutes', icon: <Building2 size={18} /> },
         { id: 'departments', label: 'Departments', icon: <Layers size={18} /> },
         { id: 'events', label: 'Events', icon: <Calendar size={18} /> },
+        { id: 'participants', label: 'Participants', icon: <UsersIcon size={18} /> },
     ];
 
     const currentList = data[activeTab].filter(item => {
@@ -63,7 +72,9 @@ const ManageData = () => {
         return (
             (item.InstituteName && item.InstituteName.toLowerCase().includes(query)) ||
             (item.DepartmentName && item.DepartmentName.toLowerCase().includes(query)) ||
-            (item.EventName && item.EventName.toLowerCase().includes(query))
+            (item.EventName && item.EventName.toLowerCase().includes(query)) ||
+            (item.ParticipantName && item.ParticipantName.toLowerCase().includes(query)) ||
+            (item.ParticipantEmail && item.ParticipantEmail.toLowerCase().includes(query))
         );
     });
 
@@ -127,7 +138,9 @@ const ManageData = () => {
                                 <tr className="bg-white/5 border-b border-white/5">
                                     <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Name</th>
                                     <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                        {activeTab === 'events' ? 'Department' : activeTab === 'departments' ? 'Institute' : 'Description'}
+                                        {activeTab === 'events' ? 'Department' : 
+                                         activeTab === 'departments' ? 'Institute' : 
+                                         activeTab === 'participants' ? 'Enrollment' : 'Description'}
                                     </th>
                                     <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                                 </tr>
@@ -138,24 +151,27 @@ const ManageData = () => {
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                                    {(item.InstituteName || item.DepartmentName || item.EventName)[0]}
+                                                    {(item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName)[0]}
                                                 </div>
                                                 <span className="text-white font-semibold">
-                                                    {item.InstituteName || item.DepartmentName || item.EventName}
+                                                    {item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-8 py-5 text-sm text-gray-400">
                                             {activeTab === 'events' ? (item.DepartmentID?.DepartmentName || 'N/A') :
                                              activeTab === 'departments' ? (item.InstituteID?.InstituteName || 'N/A') :
+                                             activeTab === 'participants' ? (item.ParticipantEnrollmentNumber || 'N/A') :
                                              (item.InstituteDescription || 'University Campus')}
                                         </td>
                                         <td className="px-8 py-5 text-right">
                                             <button
                                                 onClick={() => handleDelete(
-                                                    activeTab === 'events' ? 'event' : activeTab === 'departments' ? 'department' : 'institute',
+                                                    activeTab === 'events' ? 'event' : 
+                                                    activeTab === 'departments' ? 'department' : 
+                                                    activeTab === 'participants' ? 'participant' : 'institute',
                                                     item._id,
-                                                    item.InstituteName || item.DepartmentName || item.EventName
+                                                    item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName
                                                 )}
                                                 className="p-3 text-gray-500 hover:text-white hover:bg-red-500 rounded-xl transition-all"
                                                 title="Delete permanently"

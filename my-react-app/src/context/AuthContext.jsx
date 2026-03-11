@@ -11,7 +11,9 @@ export const AuthProvider = ({ children }) => {
         await authService.login(credentials);
         const userData = await authService.getMe();
         setUser(userData);
+        return userData;
     };
+
 
     const logout = async () => {
         try {

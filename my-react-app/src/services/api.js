@@ -87,6 +87,10 @@ export const participantService = {
         const response = await api.post('/participants', data);
         return response.data;
     },
+    delete: async (id) => {
+        const response = await api.delete(`/participants/${id}`);
+        return response.data;
+    }
 };
 
 export const groupService = {

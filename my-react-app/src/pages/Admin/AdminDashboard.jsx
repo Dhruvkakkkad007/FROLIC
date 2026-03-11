@@ -64,10 +64,10 @@ const AdminDashboard = () => {
     };
 
     const statCards = [
-        { label: 'Total Institutes', value: stats.totalInstitutes, icon: <Building2 className="text-blue-500" />, color: 'blue' },
-        { label: 'Total Departments', value: stats.totalDepartments, icon: <Layers className="text-purple-500" />, color: 'purple' },
-        { label: 'Total Events', value: stats.totalEvents, icon: <Calendar className="text-pink-500" />, color: 'pink' },
-        { label: 'Total Participants', value: stats.totalParticipants, icon: <Users className="text-orange-500" />, color: 'orange' },
+        { label: 'Total Institutes', value: stats.totalInstitutes, icon: <Building2 className="text-blue-500" />, color: 'blue', link: '/admin/manage?tab=institutes' },
+        { label: 'Total Departments', value: stats.totalDepartments, icon: <Layers className="text-purple-500" />, color: 'purple', link: '/admin/manage?tab=departments' },
+        { label: 'Total Events', value: stats.totalEvents, icon: <Calendar className="text-pink-500" />, color: 'pink', link: '/admin/manage?tab=events' },
+        { label: 'Total Participants', value: stats.totalParticipants, icon: <Users className="text-orange-500" />, color: 'orange', link: '/admin/participants' },
     ];
 
     return (
@@ -103,20 +103,20 @@ const AdminDashboard = () => {
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 {statCards.map((stat, i) => (
-                    <div key={i} className="glass p-8 rounded-[2rem] border border-white/5 hover:border-white/10 transition-all group">
+                    <Link key={i} to={stat.link} className="glass p-8 rounded-[2rem] border border-white/5 hover:border-primary/50 transition-all group block text-left">
                         <div className="flex justify-between items-start mb-6">
                             <div className={`p-4 rounded-2xl bg-${stat.color}-500/10 group-hover:scale-110 transition-transform`}>
                                 {stat.icon}
                             </div>
-                            <span className="text-xs font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded-md flex items-center gap-1">
-                                <TrendingUp size={12} /> Active
+                            <span className="text-[10px] font-bold text-green-500 bg-green-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-green-500/20">
+                                <TrendingUp size={12} /> Live
                             </span>
                         </div>
-                        <h4 className="text-gray-400 text-sm font-medium uppercase tracking-widest mb-2">{stat.label}</h4>
-                        <div className="text-4xl font-display font-bold text-white">
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-[0.2em] mb-2">{stat.label}</p>
+                        <div className="text-4xl font-display font-bold text-white group-hover:text-primary transition-colors">
                             {loading ? "..." : stat.value}
                         </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
 
@@ -164,6 +164,10 @@ const AdminDashboard = () => {
                                 <Link to="/admin/manage?tab=events" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group">
                                     <span className="text-white">Events</span>
                                     <ArrowRight size={18} className="text-gray-500 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                                </Link>
+                                <Link to="/admin/participants" className="flex items-center justify-between p-4 bg-primary/10 rounded-2xl hover:bg-primary/20 transition-colors group border border-primary/20">
+                                    <span className="text-white font-bold">Participant Registry</span>
+                                    <ArrowRight size={18} className="text-primary group-hover:translate-x-1 transition-all" />
                                 </Link>
                             </div>
                         </div>
