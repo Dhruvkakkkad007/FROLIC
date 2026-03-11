@@ -1,0 +1,59 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import Dashboard from './pages/Dashboard/Dashboard';
+import Login from './pages/Login/Login';
+import Institutes from './pages/Institutes/Institutes';
+import Departments from './pages/Departments/Departments';
+import Events from './pages/Events/Events';
+
+// Admin/Form Pages
+import AddInstitute from './pages/Admin/AddInstitute';
+import AddDepartment from './pages/Admin/AddDepartment';
+import AddEvent from './pages/Admin/AddEvent';
+import ManageData from './pages/Admin/ManageData';
+import AddGroup from './pages/Admin/AddGroup';
+import AddParticipant from './pages/Admin/AddParticipant';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+
+import { AuthProvider } from './context/AuthContext';
+
+import ProtectedRoute from './components/ProtectedRoute';
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Auth Routes */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Main Routes */}
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="institutes" element={<Institutes />} />
+            <Route path="departments" element={<Departments />} />
+            <Route path="events" element={<Events />} />
+
+            {/* Protected Form Routes */}
+            <Route element={<ProtectedRoute adminOnly={true} />}>
+              <Route path="admin">
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="manage" element={<ManageData />} />
+                <Route path="add-institute" element={<AddInstitute />} />
+                <Route path="add-department" element={<AddDepartment />} />
+                <Route path="add-event" element={<AddEvent />} />
+              </Route>
+            </Route>
+          </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;
