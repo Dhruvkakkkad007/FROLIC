@@ -26,9 +26,11 @@ const EventRegistration = ({ event, onSuccess }) => {
         if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
+    const isIndividualEvent = event?.GroupMaxParticipants === 1;
+
     const validate = () => {
         let tempErrors = {};
-        if (!formData.GroupName.trim()) tempErrors.GroupName = "Team name is required";
+        if (!isIndividualEvent && !formData.GroupName.trim()) tempErrors.GroupName = "Team name is required";
         if (!formData.ParticipantName.trim()) tempErrors.ParticipantName = "Your name is required";
         if (!formData.ParticipantEnrollmentNumber.trim()) tempErrors.ParticipantEnrollmentNumber = "Enrollment/ID is required";
         if (!formData.ParticipantInstituteName.trim()) tempErrors.ParticipantInstituteName = "Institute name is required";
@@ -45,10 +47,13 @@ const EventRegistration = ({ event, onSuccess }) => {
 
         setLoading(true);
         try {
-            // 1. Create the Group
             // In many events, the first person is the group leader and the group name is required.
+            const finalGroupName = isIndividualEvent 
+                ? `${formData.ParticipantName}-${formData.ParticipantEnrollmentNumber}`
+                : formData.GroupName;
+
             const groupResponse = await groupService.create({
-                GroupName: formData.GroupName,
+                GroupName: finalGroupName,
                 EventID: event._id
             });
             const groupId = groupResponse.group._id;
@@ -84,36 +89,43 @@ const EventRegistration = ({ event, onSuccess }) => {
                 </div>
             )}
 
-            {/* Event Header Card */}
             <div className="p-6 bg-gradient-to-br from-primary/10 to-secondary/10 border border-white/10 rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/30 transition-colors duration-500"></div>
-                <div className="flex items-center gap-5 relative z-10">
-                    <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center shadow-inner">
-                        <Users className="text-primary" size={32} />
+                <div className="flex items-center gap-5 relative z-10 justify-between">
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center shadow-inner shrink-0">
+                            <Users className="text-primary" size={32} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] mb-1">Official Registration</p>
+                            <h4 className="text-2xl font-display font-bold text-white leading-tight">{event.EventName}</h4>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] mb-1">Official Registration</p>
-                        <h4 className="text-2xl font-display font-bold text-white leading-tight">{event.EventName}</h4>
+                    <div className="text-right">
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.1em] mb-1">Registration Fee</p>
+                        <h4 className="text-2xl font-display font-bold text-primary leading-tight">₹{event.EventFees || 0}</h4>
                     </div>
                 </div>
             </div>
 
-            <div className="space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                    <div className="w-1 h-6 bg-primary rounded-full"></div>
-                    <h5 className="text-white font-bold uppercase text-xs tracking-widest">Team Identity</h5>
+            {!isIndividualEvent && (
+                <div className="space-y-6">
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-1 h-6 bg-primary rounded-full"></div>
+                        <h5 className="text-white font-bold uppercase text-xs tracking-widest">Team Identity</h5>
+                    </div>
+                    <FormField
+                        label="Team Name"
+                        name="GroupName"
+                        value={formData.GroupName}
+                        onChange={handleChange}
+                        error={errors.GroupName}
+                        placeholder="Enter a unique name for your team"
+                        icon={<Users size={18} />}
+                        required
+                    />
                 </div>
-                <FormField
-                    label="Team Name"
-                    name="GroupName"
-                    value={formData.GroupName}
-                    onChange={handleChange}
-                    error={errors.GroupName}
-                    placeholder="Enter a unique name for your team"
-                    icon={<Users size={18} />}
-                    required
-                />
-            </div>
+            )}
 
             <div className="space-y-6 pt-4 border-t border-white/5">
                 <div className="flex items-center gap-2 mb-2">
@@ -201,7 +213,9 @@ const EventRegistration = ({ event, onSuccess }) => {
                     ) : (
                         <>
                             <CheckCircle size={22} className="group-hover:scale-110 transition-transform" />
-                            <span className="font-bold text-lg">Confirm Registration</span>
+                            <span className="font-bold text-lg">
+                                {event.EventFees && event.EventFees > 0 ? `Pay ₹${event.EventFees} & Register` : "Confirm Free Registration"}
+                            </span>
                         </>
                     )}
                 </button>

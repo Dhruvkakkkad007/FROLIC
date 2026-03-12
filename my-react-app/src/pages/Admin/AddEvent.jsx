@@ -23,8 +23,10 @@ const AddEvent = ({ isModal = false, onSuccess }) => {
         EventMainStudentCoOrdinatorPhone: '',
         EventMainStudentCoOrdinatorEmail: '',
         EventLocation: '',
+        EventLocation: '',
         MaxGroupsAllowed: 50,
-        EventType: 'Technical' // Used for filtering in frontend
+        EventType: 'Technical',
+        IsGroupEvent: false
     });
     const [departments, setDepartments] = useState([]);
     const [users, setUsers] = useState([]);
@@ -109,7 +111,8 @@ const AddEvent = ({ isModal = false, onSuccess }) => {
                     EventMainStudentCoOrdinatorEmail: '',
                     EventLocation: '',
                     MaxGroupsAllowed: 50,
-                    EventType: 'Technical'
+                    EventType: 'Technical',
+                    IsGroupEvent: false
                 });
                 if (onSuccess) onSuccess();
             } catch (err) {
@@ -142,6 +145,60 @@ const AddEvent = ({ isModal = false, onSuccess }) => {
                 placeholder="e.g. Code-A-Thon 2025"
                 required
             />
+
+            <FormField
+                label="Event Image Cover URL"
+                name="EventImage"
+                value={formData.EventImage}
+                onChange={handleChange}
+                placeholder="https://example.com/event-cover.jpg"
+            />
+
+            <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
+                <div className="flex items-center gap-4 mb-4">
+                    <label className="text-white text-sm font-bold flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="IsGroupEvent"
+                            checked={!formData.IsGroupEvent}
+                            onChange={() => setFormData(prev => ({ ...prev, IsGroupEvent: false, GroupMinParticipants: 1, GroupMaxParticipants: 1 }))}
+                            className="accent-primary w-4 h-4"
+                        />
+                        Individual Event
+                    </label>
+                    <label className="text-white text-sm font-bold flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="radio"
+                            name="IsGroupEvent"
+                            checked={formData.IsGroupEvent}
+                            onChange={() => setFormData(prev => ({ ...prev, IsGroupEvent: true, GroupMinParticipants: 2, GroupMaxParticipants: 4 }))}
+                            className="accent-primary w-4 h-4"
+                        />
+                        Group Event
+                    </label>
+                </div>
+
+                {formData.IsGroupEvent && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in zoom-in-95 duration-300">
+                        <FormField
+                            label="Min Participants"
+                            name="GroupMinParticipants"
+                            type="number"
+                            value={formData.GroupMinParticipants}
+                            onChange={handleChange}
+                            required
+                        />
+                        <FormField
+                            label="Max Participants"
+                            name="GroupMaxParticipants"
+                            type="number"
+                            value={formData.GroupMaxParticipants}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <FormField

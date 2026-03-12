@@ -81,7 +81,7 @@ const Navbar = () => {
                 <Link to={user?.isAdmin ? "/admin/dashboard" : "/"} className="flex items-center gap-2 group">
 
                     <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg">
-                        <Rocket className="text-white w-6 h-6" />
+                       <img src='https://frolic.aswdc.in/images/logo/frolic_logo.png'/>
                     </div>
                     <span className="text-2xl font-display font-bold text-white tracking-tight">
                         Frolic<span className="text-primary">.</span>

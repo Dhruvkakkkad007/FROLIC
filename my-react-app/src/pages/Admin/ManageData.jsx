@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { instituteService, departmentService, eventService, participantService } from '../../services/api';
-import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon } from 'lucide-react';
+import { instituteService, departmentService, eventService, participantService, userService } from '../../services/api';
+import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon, UserCog, Shield, ShieldOff } from 'lucide-react';
 
 const ManageData = () => {
     const location = useLocation();
@@ -10,30 +10,32 @@ const ManageData = () => {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tab = params.get('tab');
-        if (tab && ['institutes', 'departments', 'events', 'participants'].includes(tab)) {
+        if (tab && ['institutes', 'departments', 'events', 'participants', 'users'].includes(tab)) {
             setActiveTab(tab);
         }
     }, [location]);
 
-    const [data, setData] = useState({ institutes: [], departments: [], events: [], participants: [] });
+    const [data, setData] = useState({ institutes: [], departments: [], events: [], participants: [], users: [] });
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [insts, depts, evts, parts] = await Promise.all([
+            const [insts, depts, evts, parts, usrs] = await Promise.all([
                 instituteService.getAll(),
                 departmentService.getAll(),
                 eventService.getAll(),
-                participantService.getAll()
+                participantService.getAll(),
+                userService.getAll().catch(() => []) // Handle case where user might not be super admin
             ]);
             
             setData({ 
                 institutes: insts || [], 
                 departments: depts || [], 
                 events: evts || [],
-                participants: parts || []
+                participants: parts || [],
+                users: usrs || []
             });
         } catch (err) {
             console.error("Failed to fetch management data", err);
@@ -53,10 +55,20 @@ const ManageData = () => {
                 if (type === 'department') await departmentService.delete(id);
                 if (type === 'event') await eventService.delete(id);
                 if (type === 'participant') await participantService.delete(id);
+                if (type === 'user') await userService.delete(id);
                 fetchData();
             } catch (err) {
                 alert("Deletion failed: " + (err.response?.data?.message || err.message));
             }
+        }
+    };
+
+    const handleToggleAdmin = async (id, currentStatus) => {
+        try {
+            await userService.update(id, { isAdmin: !currentStatus });
+            fetchData();
+        } catch (err) {
+            alert("Update failed: " + (err.response?.data?.message || err.message));
         }
     };
 
@@ -65,6 +77,7 @@ const ManageData = () => {
         { id: 'departments', label: 'Departments', icon: <Layers size={18} /> },
         { id: 'events', label: 'Events', icon: <Calendar size={18} /> },
         { id: 'participants', label: 'Participants', icon: <UsersIcon size={18} /> },
+        { id: 'users', label: 'Users', icon: <UserCog size={18} /> },
     ];
 
     const currentList = data[activeTab].filter(item => {
@@ -74,7 +87,9 @@ const ManageData = () => {
             (item.DepartmentName && item.DepartmentName.toLowerCase().includes(query)) ||
             (item.EventName && item.EventName.toLowerCase().includes(query)) ||
             (item.ParticipantName && item.ParticipantName.toLowerCase().includes(query)) ||
-            (item.ParticipantEmail && item.ParticipantEmail.toLowerCase().includes(query))
+            (item.ParticipantEmail && item.ParticipantEmail.toLowerCase().includes(query)) ||
+            (item.UserName && item.UserName.toLowerCase().includes(query)) ||
+            (item.EmailAddress && item.EmailAddress.toLowerCase().includes(query))
         );
     });
 
@@ -140,7 +155,8 @@ const ManageData = () => {
                                     <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
                                         {activeTab === 'events' ? 'Department' : 
                                          activeTab === 'departments' ? 'Institute' : 
-                                         activeTab === 'participants' ? 'Enrollment' : 'Description'}
+                                         activeTab === 'participants' ? 'Enrollment' : 
+                                         activeTab === 'users' ? 'Email & Role' : 'Description'}
                                     </th>
                                     <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                                 </tr>
@@ -151,10 +167,10 @@ const ManageData = () => {
                                         <td className="px-8 py-5">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
-                                                    {(item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName)[0]}
+                                                    {(item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName)[0]}
                                                 </div>
                                                 <span className="text-white font-semibold">
-                                                    {item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName}
+                                                    {item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName}
                                                 </span>
                                             </div>
                                         </td>
@@ -162,16 +178,36 @@ const ManageData = () => {
                                             {activeTab === 'events' ? (item.DepartmentID?.DepartmentName || 'N/A') :
                                              activeTab === 'departments' ? (item.InstituteID?.InstituteName || 'N/A') :
                                              activeTab === 'participants' ? (item.ParticipantEnrollmentNumber || 'N/A') :
+                                             activeTab === 'users' ? (
+                                                <div className="flex items-center gap-2">
+                                                    {item.EmailAddress}
+                                                    {item.isAdmin ? (
+                                                        <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-md font-bold">ADMIN</span>
+                                                    ) : (
+                                                        <span className="bg-gray-500/10 text-gray-400 text-[10px] px-2 py-0.5 rounded-md font-bold">USER</span>
+                                                    )}
+                                                </div>
+                                             ) :
                                              (item.InstituteDescription || 'University Campus')}
                                         </td>
-                                        <td className="px-8 py-5 text-right">
+                                        <td className="px-8 py-5 text-right whitespace-nowrap">
+                                            {activeTab === 'users' && (
+                                                <button
+                                                    onClick={() => handleToggleAdmin(item._id, item.isAdmin)}
+                                                    className={`p-3 mr-2 text-gray-500 hover:text-white rounded-xl transition-all ${item.isAdmin ? 'hover:bg-orange-500' : 'hover:bg-green-500'}`}
+                                                    title={item.isAdmin ? "Remove Admin Role" : "Make Admin"}
+                                                >
+                                                    {item.isAdmin ? <ShieldOff size={18} /> : <Shield size={18} />}
+                                                </button>
+                                            )}
                                             <button
                                                 onClick={() => handleDelete(
                                                     activeTab === 'events' ? 'event' : 
                                                     activeTab === 'departments' ? 'department' : 
-                                                    activeTab === 'participants' ? 'participant' : 'institute',
+                                                    activeTab === 'participants' ? 'participant' : 
+                                                    activeTab === 'users' ? 'user' : 'institute',
                                                     item._id,
-                                                    item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName
+                                                    item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName
                                                 )}
                                                 className="p-3 text-gray-500 hover:text-white hover:bg-red-500 rounded-xl transition-all"
                                                 title="Delete permanently"

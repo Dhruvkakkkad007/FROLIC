@@ -678,6 +678,20 @@ Required Fields: ParticipantName, ParticipantEnrollmentNumber
 
 Note: Enrollment number must be unique
 
+### Get All Participants (Registry View)
+GET /api/participants
+
+Permissions: Admin Only
+
+Response:
+Returns a full list of all participants with deep population:
+- GroupID
+- EventID
+- DepartmentID
+- InstituteID
+
+Notes: This is used for the master Participant Registry and supports cross-event data analysis.
+
 ## 9. Participant API
 
 ### Update Participant
@@ -695,7 +709,9 @@ Body (partial updates):
 ### Delete Participant
 DELETE /api/participants/:id
 
-Permissions: Group Leader OR Event Coordinator
+Permissions: Admin OR Group Leader OR Event Coordinator
+
+Notes: Administrators have master permission to delete any participant entry.
 
 ## 10. Winner Management API
 

@@ -76,6 +76,14 @@ export const userService = {
         const response = await api.get(`/users/${id}`);
         return response.data.user;
     },
+    update: async (id, data) => {
+        const response = await api.patch(`/users/${id}`, data);
+        return response.data;
+    },
+    delete: async (id) => {
+        const response = await api.delete(`/users/${id}`);
+        return response.data;
+    }
 };
 
 export const participantService = {
@@ -100,6 +108,10 @@ export const groupService = {
     },
     getByEvent: async (eventId) => {
         const response = await api.get(`/groups/event/${eventId}`);
+        return response.data;
+    },
+    update: async (id, data) => {
+        const response = await api.patch(`/groups/${id}`, data);
         return response.data;
     }
 };

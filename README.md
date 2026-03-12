@@ -1,100 +1,128 @@
-# Frolic 2025 - Event Management System
+# Frolic 2025 - Event Management System 🚀
 
-A premium technical and cultural symposium platform built with React, Tailwind CSS, Node.js, and MongoDB.
+A state-of-the-art, premium event management platform built for technical and cultural symposiums. This project features a high-end **React** frontend and a robust **Node.js** backend, providing a seamless experience for students, coordinators, and administrators.
 
-## 🚀 Features
+---
 
-- **Full-Stack Integration**: Connected React frontend with a secure Node.js REST API.
-- **Dynamic Dashboard**: Personalized welcome messages and live featured events from the database.
-- **Event Management**: Browse, filter (Technical/Non-Technical), and search for events.
-- **Role-Based Access**: Specialized views for Students, Mentors, and Administrators.
-- **Admin Suite**: Comprehensive forms for managing Institutes, Departments, and Events.
-- **Premium UI**: Glassmorphism design, smooth animations, and a responsive mobile-first layout.
+## ✨ Features
+
+### 👤 User Interface
+- **Premium Aesthetics**: Stunning glassmorphism design with backdrop blurs, gradients, and subtle micro-animations.
+- **Dynamic Dashboard**: Live statistics showing active events, registered participants, and upcoming dates.
+- **Departmental Filtering**: Browse events by department with smooth transitions and real-time filtering.
+- **Public Registration**: Students can register for events directly from the dashboard without mandatory login (can also be auth-linked).
+- **Interactive Event Cards**: Quick access to event details and registration forms.
+
+### 🔐 Admin Suite
+- **Comprehensive Registry**: A master "Participant Registry" page to monitor every registered student across all events.
+- **Data Management**: Dedicated tools to Create, Read, and Delete Institutes, Departments, and Events.
+- **Live Search & Sort**: Advanced filtering and sorting capabilities on the administrative management tables.
+- **CSV Export**: One-click functionality to download the entire participant database for local reporting.
+- **Role-Based Access**: Secured routes and middleware ensuring only authorized personnel can manage the fest's infrastructure.
+
+### ⚙️ Technical Brilliance
+- **Deep Population**: Utilizes Mongoose deep population logic to perfectly link Participants → Groups → Events → Departments → Institutes.
+- **Real-time Synchronization**: Frontend and Backend are perfectly synced to reflect registrations and counts instantly.
+- **Secure Persistence**: JWT-based authentication stored in HttpOnly cookies for a secure, persistent session.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Vite, Tailwind CSS, Lucide React, Axios.
-- **Backend**: Node.js, Express 5, Mongoose, JWT (JWT-based cookie auth), Bcrypt.
-- **Database**: MongoDB (Local or Atlas).
+### Frontend
+- **Framework**: `React 19` (Vite 7)
+- **Styling**: `Tailwind CSS 3.4` (Custom Glassmorphism system)
+- **Icons**: `Lucide React`
+- **Routing**: `React Router Dom 7`
+- **API Client**: `Axios`
+
+### Backend
+- **Platform**: `Node.js`
+- **Framework**: `Express 5`
+- **Database**: `MongoDB` (Mongoose 9)
+- **Security**: `JSON Web Tokens (JWT)`, `BcryptJS`, `Cookie-Parser`
+- **Dev Tooling**: `Nodemon`
 
 ---
 
 ## 🏁 Getting Started
 
 ### Prerequisites
+- **Node.js**: v18 or higher.
+- **MongoDB**: A running local instance or a cloud URI (Atlas).
 
-- [Node.js](https://nodejs.org/) (v18+)
-- [MongoDB](https://www.mongodb.com/try/download/community) (Running locally or a cloud URI)
+### 1. Installation
 
-### 1. Project Setup
-
-Clone the repository and install dependencies for both components.
+Clone the project and install the dependencies for both directories:
 
 ```bash
-# Install Backend dependencies
+# Set up Backend
 cd Backend
 npm install
 
-# Install Frontend dependencies
+# Set up Frontend
 cd ../my-react-app
 npm install
 ```
 
-### 2. Configuration
+### 2. Environment Variables
 
-Create a `.env` file in the `Backend` directory (copy from `.env.sample` if available).
+Create a `.env` file in the `Backend` directory:
 
 ```env
-MONGO_URL=mongodb://127.0.0.1:27017/frolic
-JWT_SECRET=your_jwt_secret_here
+MONGO_URL=your_mongodb_connection_string
+JWT_SECRET=your_super_secret_key
 PORT=3000
 NODE_ENV=development
 ```
 
-### 3. Running the Application
+### 3. Launching the App
 
-You need to run the **Backend** and **Frontend** simultaneously.
+Start the development servers for both environments:
 
-#### Start the Backend
-Open a terminal in the `Backend` folder:
+**Terminal 1 (Backend):**
 ```bash
+cd Backend
 npm run dev
 ```
-*The server will start at `http://localhost:3000`*
 
-#### Start the Frontend
-Open a NEW terminal in the `my-react-app` folder:
+**Terminal 2 (Frontend):**
 ```bash
+cd my-react-app
 npm run dev
 ```
-*The application will be available at `http://localhost:5173`*
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Architecture
 
-- `/Backend`: Express server, Mongoose models, and API routes.
-- `/my-react-app`: Vite-powered React frontend with Tailwind CSS.
-  - `/src/components`: Reusable UI components (Forms, Modals, Navbar).
-  - `/src/pages`: Main application views (Dashboard, Events, Login).
-  - `/src/services`: API integration services using Axios.
-  - `/src/context`: Authentication and global state management.
+```plaintext
+├── /Backend
+│   ├── /models       # Mongoose Schemas (Institute, Event, Participant, etc.)
+│   ├── /routes       # API Endpoints (Auth, Participants, Events)
+│   ├── /middleware   # Auth guards and validation
+│   └── server.js     # Express application entry point
+│
+├── /my-react-app
+│   ├── /src
+│   │   ├── /components # Reusable UI (Forms, Navbar, Modal)
+│   │   ├── /pages      # Main Views (Dashboard, Admin Registry, Events)
+│   │   ├── /services   # Axios API service layer
+│   │   ├── /context    # Global Auth State
+│   │   └── App.jsx     # Main Routing & App Logic
+│   └── tailwind.config.js
+```
 
 ---
 
-## 🛡️ Authentication
+## 🛡️ Administrative Functionality
 
-The system uses **JWT stored in HttpOnly Cookies** for secure sessions.
-- **Login**: `authService.login(credentials)`
-- **Session Check**: `authService.getMe()` (Persists user state across refreshes)
-- **Logout**: `authService.logout()` (Clears server-side cookies)
+- **Dashboard**: `http://localhost:5173/admin/dashboard`
+- **Participant Registry**: `http://localhost:5173/admin/participants` (View/Search/Export/Delete)
+- **Manage Tools**: `http://localhost:5173/admin/manage` (Institutes/Departments/Events/Participants tabs)
 
 ---
 
-## 🎨 Design System
+## 📄 License
 
-- **Colors**: Dark theme with `#E91E63` (Primary) and `#9C27B0` (Secondary) accents.
-- **Aesthetics**: Glass-morphism, backdrop blurs, and premium animations.
-- **Responsiveness**: Fully optimized for mobile, tablet, and desktop viewports.
+This project is licensed under the **ISC License**. Built for the ultimate symposium experience.

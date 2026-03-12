@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { participantService } from '../../services/api';
+import { participantService, groupService } from '../../services/api';
 import { 
     Users, 
     Search, 
@@ -11,7 +11,9 @@ import {
     Filter,
     Download,
     Trash2,
-    ArrowUpDown
+    ArrowUpDown,
+    CreditCard,
+    CheckCircle2
 } from 'lucide-react';
 
 const AllParticipants = () => {
@@ -44,6 +46,15 @@ const AllParticipants = () => {
             } catch (err) {
                 alert("Deletion failed: " + (err.response?.data?.message || err.message));
             }
+        }
+    };
+
+    const handleToggleGroupStatus = async (groupId, field, currentValue) => {
+        try {
+            await groupService.update(groupId, { [field]: !currentValue });
+            fetchParticipants();
+        } catch (err) {
+            alert(`Failed to update ${field}: ` + (err.response?.data?.message || err.message));
         }
     };
 
@@ -154,6 +165,7 @@ const AllParticipants = () => {
                                         </div>
                                     </th>
                                     <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Institute & Dept</th>
+                                    <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
                                     <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -203,6 +215,34 @@ const AllParticipants = () => {
                                                 </div>
                                             </div>
                                         </td>
+                                        <td className="px-8 py-6">
+                                            {p.GroupID ? (
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleToggleGroupStatus(p.GroupID?._id, 'IsPaymentDone', p.GroupID?.IsPaymentDone)}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                                                            p.GroupID.IsPaymentDone 
+                                                            ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20' 
+                                                            : 'bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/20'
+                                                        }`}
+                                                    >
+                                                        <CreditCard size={12} /> {p.GroupID.IsPaymentDone ? 'Paid' : 'Unpaid'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleToggleGroupStatus(p.GroupID?._id, 'IsPresent', p.GroupID?.IsPresent)}
+                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                                                            p.GroupID.IsPresent 
+                                                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' 
+                                                            : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        <CheckCircle2 size={12} /> {p.GroupID.IsPresent ? 'Present' : 'Absent'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-500 text-xs italic">No Group</span>
+                                            )}
+                                        </td>
                                         <td className="px-8 py-6 text-right">
                                             <button 
                                                 onClick={() => handleDelete(p._id, p.ParticipantName)}
@@ -215,7 +255,7 @@ const AllParticipants = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="5" className="px-8 py-32 text-center text-gray-500 italic">
+                                        <td colSpan="6" className="px-8 py-32 text-center text-gray-500 italic">
                                             <div className="flex flex-col items-center gap-4">
                                                 <Users className="opacity-20" size={60} />
                                                 <p className="text-lg">No participants found matching your criteria.</p>
