@@ -43,7 +43,8 @@ const Navbar = () => {
     ];
 
     const isAdminPath = location.pathname.startsWith('/admin');
-    const currentLinks = (user?.isAdmin && isAdminPath) ? adminLinks : navLinks;
+    const hasAdminAccess = user?.isAdmin || user?.isCoordinator;
+    const currentLinks = (hasAdminAccess && isAdminPath) ? adminLinks : navLinks;
 
     const isActive = (path) => {
         if (path === '/') return location.pathname === '/' && !location.hash;
@@ -78,7 +79,7 @@ const Navbar = () => {
     return (
         <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'glass py-3 shadow-2xl' : 'bg-transparent py-6'}`}>
             <div className="container mx-auto px-6 flex justify-between items-center h-full">
-                <Link to={user?.isAdmin ? "/admin/dashboard" : "/"} className="flex items-center gap-2 group">
+                <Link to={hasAdminAccess ? "/admin/dashboard" : "/"} className="flex items-center gap-2 group">
 
                     <div className="w-10 h-10 bg-gradient-to-tr from-primary to-secondary rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform shadow-lg">
                        <img src='https://frolic.aswdc.in/images/logo/frolic_logo.png'/>
@@ -103,8 +104,8 @@ const Navbar = () => {
                         </Link>
                     ))}
 
-                    {/* Admin Dropdown - Only for Admins (hidden when already on admin side) */}
-                    {user?.isAdmin && !isAdminPath && (
+                    {/* Admin Dropdown - Only for Admins/Coordinators (hidden when already on admin side) */}
+                    {hasAdminAccess && !isAdminPath && (
                         <div className="relative group">
                             <button
                                 className="flex items-center gap-1 text-sm font-medium text-gray-300 hover:text-primary transition-colors"
@@ -185,7 +186,7 @@ const Navbar = () => {
                         ))}
 
                         {/* Admin Section (hidden when already on admin side) */}
-                        {user?.isAdmin && !isAdminPath && (
+                        {hasAdminAccess && !isAdminPath && (
                             <div className="border-t border-white/10 pt-4 mt-2">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 ml-1">Administration</p>
                                 <div className="grid grid-cols-1 gap-4">

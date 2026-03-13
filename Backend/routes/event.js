@@ -108,9 +108,10 @@ router.post("/", authMiddleware, async (req, res) => {
         }
 
         const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
         const isDeptCoOrdinator = department.DepartmentCoOrdinatorID.toString() === req.user.id;
 
-        if (!isAdmin && !isDeptCoOrdinator) {
+        if (!isAdmin && !isCoordinator && !isDeptCoOrdinator) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -164,9 +165,10 @@ router.patch("/:id", authMiddleware, async (req, res) => {
         }
 
         const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
         const isEventCoOrdinator = event.EventCoOrdinatorID.toString() === req.user.id;
 
-        if (!isAdmin && !isEventCoOrdinator) {
+        if (!isAdmin && !isCoordinator && !isEventCoOrdinator) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -229,8 +231,15 @@ router.patch("/:id", authMiddleware, async (req, res) => {
     }
 })
 
-router.delete("/:id", authMiddleware, adminOnly, async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
+        const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
+        
+        if (!isAdmin && !isCoordinator) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid Event ID" });
@@ -280,9 +289,10 @@ router.get("/:id/groups", authMiddleware, async (req, res) => {
         }
 
         const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
         const isEventCoOrdinator = event.EventCoOrdinatorID.toString() === req.user.id;
 
-        if (!isAdmin && !isEventCoOrdinator) {
+        if (!isAdmin && !isCoordinator && !isEventCoOrdinator) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -384,9 +394,10 @@ router.post("/:id/winners", authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "Event not found" });
         }
 
+        const isCoordinator = req.user.isCoordinator;
         const isEventCoOrdinator = event.EventCoOrdinatorID.toString() === userID.toString();
 
-        if (!isAdmin && !isEventCoOrdinator) {
+        if (!isAdmin && !isCoordinator && !isEventCoOrdinator) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 

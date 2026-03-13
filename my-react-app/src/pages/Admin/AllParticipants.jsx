@@ -228,16 +228,6 @@ const AllParticipants = () => {
                                                     >
                                                         <CreditCard size={12} /> {p.GroupID.IsPaymentDone ? 'Paid' : 'Unpaid'}
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleToggleGroupStatus(p.GroupID?._id, 'IsPresent', p.GroupID?.IsPresent)}
-                                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                                                            p.GroupID.IsPresent 
-                                                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' 
-                                                            : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'
-                                                        }`}
-                                                    >
-                                                        <CheckCircle2 size={12} /> {p.GroupID.IsPresent ? 'Present' : 'Absent'}
-                                                    </button>
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-500 text-xs italic">No Group</span>

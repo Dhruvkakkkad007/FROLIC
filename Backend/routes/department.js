@@ -62,9 +62,10 @@ router.post("/", authMiddleware, async (req, res) => {
         }
 
         const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
         const isInstituteCoOrdinator = institute.InstituteCoOrdinatorID.toString() === req.user.id;
 
-        if (!isAdmin && !isInstituteCoOrdinator) {
+        if (!isAdmin && !isCoordinator && !isInstituteCoOrdinator) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -99,9 +100,10 @@ router.patch("/:id", authMiddleware, async (req, res) => {
         }
 
         const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
         const isDepartmentCoOrdinator = department.DepartmentCoOrdinatorID.toString() === req.user.id;
 
-        if (!isAdmin && !isDepartmentCoOrdinator) {
+        if (!isAdmin && !isCoordinator && !isDepartmentCoOrdinator) {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
@@ -141,8 +143,15 @@ router.patch("/:id", authMiddleware, async (req, res) => {
     }
 })
 
-router.delete("/:id", authMiddleware, adminOnly, async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
+        const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
+        
+        if (!isAdmin && !isCoordinator) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: "Invalid Department ID" });

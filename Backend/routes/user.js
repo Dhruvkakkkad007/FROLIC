@@ -34,13 +34,19 @@ router.get("/:id", authMiddleware,selfOrAdminMiddleware, async(req,res)=>{
 
 router.patch("/:id", authMiddleware, selfOrAdminMiddleware, async (req, res) => {
   try {
+    const updates = { ...req.body };
+    
+    // Prevent non-admins from upgrading their own privileges
+    if (!req.user.isAdmin) {
+        delete updates.isAdmin;
+        delete updates.isCoordinator;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { 
-        $set: req.body 
-      },
+      { $set: updates },
       { new: true }
-    ).select("-UserPassword");    
+    ).select("-UserPassword");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

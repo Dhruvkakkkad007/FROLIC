@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { instituteService, departmentService, eventService, participantService, userService } from '../../services/api';
-import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon, UserCog, Shield, ShieldOff } from 'lucide-react';
+import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon, UserCog, Shield, ShieldOff, Star, StarOff } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const ManageData = () => {
+    const { user } = useAuth();
     const location = useLocation();
     const [activeTab, setActiveTab] = useState('institutes');
 
@@ -72,6 +74,15 @@ const ManageData = () => {
         }
     };
 
+    const handleToggleCoordinator = async (id, currentStatus) => {
+        try {
+            await userService.update(id, { isCoordinator: !currentStatus });
+            fetchData();
+        } catch (err) {
+            alert("Update failed: " + (err.response?.data?.message || err.message));
+        }
+    };
+
     const tabs = [
         { id: 'institutes', label: 'Institutes', icon: <Building2 size={18} /> },
         { id: 'departments', label: 'Departments', icon: <Layers size={18} /> },
@@ -79,8 +90,11 @@ const ManageData = () => {
         { id: 'participants', label: 'Participants', icon: <UsersIcon size={18} /> },
         { id: 'users', label: 'Users', icon: <UserCog size={18} /> },
     ];
+    
+    const visibleTabs = user?.isAdmin ? tabs : tabs.filter(t => ['departments', 'events', 'participants'].includes(t.id));
 
     const currentList = data[activeTab].filter(item => {
+
         const query = searchTerm.toLowerCase();
         return (
             (item.InstituteName && item.InstituteName.toLowerCase().includes(query)) ||
@@ -114,19 +128,23 @@ const ManageData = () => {
                     </div>
                     
                     <div className="flex gap-3 w-full md:w-auto">
-                        <Link to="/admin/add-institute" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-blue-500/30 hover:bg-blue-500/10 text-white">
-                            <Plus size={18} className="text-blue-500" /> Institute
-                        </Link>
-                        <Link to="/admin/add-department" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-purple-500/30 hover:bg-purple-500/10 text-white">
-                            <Plus size={18} className="text-purple-500" /> Dept
-                        </Link>
+                        {user?.isAdmin && (
+                            <>
+                                <Link to="/admin/add-institute" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-blue-500/30 hover:bg-blue-500/10 text-white">
+                                    <Plus size={18} className="text-blue-500" /> Institute
+                                </Link>
+                                <Link to="/admin/add-department" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-purple-500/30 hover:bg-purple-500/10 text-white">
+                                    <Plus size={18} className="text-purple-500" /> Dept
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/10 mb-8 max-w-fit">
-                {tabs.map((tab) => (
+            <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/10 mb-8 max-w-fit overflow-x-auto">
+                {visibleTabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => { setActiveTab(tab.id); setSearchTerm(''); }}
@@ -183,6 +201,8 @@ const ManageData = () => {
                                                     {item.EmailAddress}
                                                     {item.isAdmin ? (
                                                         <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-md font-bold">ADMIN</span>
+                                                    ) : item.isCoordinator ? (
+                                                        <span className="bg-purple-500/10 text-purple-500 text-[10px] px-2 py-0.5 rounded-md font-bold">COORDINATOR</span>
                                                     ) : (
                                                         <span className="bg-gray-500/10 text-gray-400 text-[10px] px-2 py-0.5 rounded-md font-bold">USER</span>
                                                     )}
@@ -192,28 +212,39 @@ const ManageData = () => {
                                         </td>
                                         <td className="px-8 py-5 text-right whitespace-nowrap">
                                             {activeTab === 'users' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleToggleCoordinator(item._id, item.isCoordinator)}
+                                                        className={`p-3 mr-2 text-gray-500 hover:text-white rounded-xl transition-all ${item.isCoordinator ? 'hover:bg-orange-500' : 'hover:bg-purple-500'}`}
+                                                        title={item.isCoordinator ? "Remove Coordinator Role" : "Make Coordinator"}
+                                                    >
+                                                        {item.isCoordinator ? <StarOff size={18} /> : <Star size={18} />}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleToggleAdmin(item._id, item.isAdmin)}
+                                                        className={`p-3 mr-2 text-gray-500 hover:text-white rounded-xl transition-all ${item.isAdmin ? 'hover:bg-orange-500' : 'hover:bg-green-500'}`}
+                                                        title={item.isAdmin ? "Remove Admin Role" : "Make Admin"}
+                                                    >
+                                                        {item.isAdmin ? <ShieldOff size={18} /> : <Shield size={18} />}
+                                                    </button>
+                                                </>
+                                            )}
+                                            {(user?.isAdmin || (activeTab === 'events' || activeTab === 'departments' || activeTab === 'participants')) && (
                                                 <button
-                                                    onClick={() => handleToggleAdmin(item._id, item.isAdmin)}
-                                                    className={`p-3 mr-2 text-gray-500 hover:text-white rounded-xl transition-all ${item.isAdmin ? 'hover:bg-orange-500' : 'hover:bg-green-500'}`}
-                                                    title={item.isAdmin ? "Remove Admin Role" : "Make Admin"}
+                                                    onClick={() => handleDelete(
+                                                        activeTab === 'events' ? 'event' : 
+                                                        activeTab === 'departments' ? 'department' : 
+                                                        activeTab === 'participants' ? 'participant' : 
+                                                        activeTab === 'users' ? 'user' : 'institute',
+                                                        item._id,
+                                                        item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName
+                                                    )}
+                                                    className="p-3 text-gray-500 hover:text-white hover:bg-red-500 rounded-xl transition-all"
+                                                    title="Delete permanently"
                                                 >
-                                                    {item.isAdmin ? <ShieldOff size={18} /> : <Shield size={18} />}
+                                                    <Trash2 size={18} />
                                                 </button>
                                             )}
-                                            <button
-                                                onClick={() => handleDelete(
-                                                    activeTab === 'events' ? 'event' : 
-                                                    activeTab === 'departments' ? 'department' : 
-                                                    activeTab === 'participants' ? 'participant' : 
-                                                    activeTab === 'users' ? 'user' : 'institute',
-                                                    item._id,
-                                                    item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName
-                                                )}
-                                                className="p-3 text-gray-500 hover:text-white hover:bg-red-500 rounded-xl transition-all"
-                                                title="Delete permanently"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
                                         </td>
                                     </tr>
                                 )) : (

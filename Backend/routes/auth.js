@@ -65,7 +65,8 @@ router.post("/login", async(req,res)=>{
                 id: user._id,
                 _id: user._id,
                 email: user.EmailAddress,
-                isAdmin: user.isAdmin
+                isAdmin: user.isAdmin,
+                isCoordinator: user.isCoordinator
             },
             process.env.JWT_SECRET,
             {expiresIn: "30m"}
@@ -81,14 +82,15 @@ router.post("/login", async(req,res)=>{
         res.status(200).json({message: "Login Successfully"});
     }
     catch(err){
+        console.error(err);
         res.status(500).json({message: "Internal Server Error"});
     }
 })
 
 
-router.get("/me",authMiddleware,async(req,res)=>{
-    try{
-        const user = await User.findById(req.user.id).select("-UserPassword");
+router.get("/me", authMiddleware, async(req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select("-UserPassword").lean();
 
         if(!user){
             return res.status(404).json({ message: "User not found" });
@@ -96,7 +98,7 @@ router.get("/me",authMiddleware,async(req,res)=>{
 
         res.status(200).json(user);
     }
-    catch(err){
+    catch(err) {
         res.status(500).json({ message: "Internal Server Error" });
     }
 })

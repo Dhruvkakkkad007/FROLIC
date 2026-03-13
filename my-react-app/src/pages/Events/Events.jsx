@@ -85,7 +85,7 @@ const Events = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 items-center">
-                    {user?.isAdmin && (
+                    {(user?.isAdmin || user?.isCoordinator) && (
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className="btn-primary py-3 px-6 flex items-center gap-2 shrink-0"
@@ -142,7 +142,7 @@ const Events = () => {
                                             } text-white shadow-lg`}>
                                             {event.EventType || 'Technical'}
                                         </span>
-                                        {user?.isAdmin && (
+                                        {(user?.isAdmin || user?.isCoordinator) && (
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); handleDeleteEvent(event._id, event.EventName); }}
                                                 className="w-8 h-8 bg-black/50 hover:bg-red-500 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"

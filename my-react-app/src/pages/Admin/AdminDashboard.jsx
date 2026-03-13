@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { instituteService, departmentService, eventService, participantService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminDashboard = () => {
+    const { user } = useAuth();
     const [stats, setStats] = useState({
         totalInstitutes: 0,
         totalDepartments: 0,
@@ -82,18 +84,22 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-4">
-                    <button
-                        onClick={() => setIsEditingLocation(true)}
-                        className="btn-outline flex items-center gap-2 py-3 px-6"
-                    >
-                        <MapPin size={18} /> Enter Location
-                    </button>
-                    <Link to="/admin/add-institute" className="btn-outline flex items-center gap-2 py-3 px-6 border-blue-500/50 hover:bg-blue-500/10 text-white">
-                        <Building2 size={18} className="text-blue-500" /> + Institute
-                    </Link>
-                    <Link to="/admin/add-department" className="btn-outline flex items-center gap-2 py-3 px-6 border-purple-500/50 hover:bg-purple-500/10 text-white">
-                        <Layers size={18} className="text-purple-500" /> + Dept
-                    </Link>
+                    {user?.isAdmin && (
+                        <>
+                            <button
+                                onClick={() => setIsEditingLocation(true)}
+                                className="btn-outline flex items-center gap-2 py-3 px-6"
+                            >
+                                <MapPin size={18} /> Enter Location
+                            </button>
+                            <Link to="/admin/add-institute" className="btn-outline flex items-center gap-2 py-3 px-6 border-blue-500/50 hover:bg-blue-500/10 text-white">
+                                <Building2 size={18} className="text-blue-500" /> + Institute
+                            </Link>
+                            <Link to="/admin/add-department" className="btn-outline flex items-center gap-2 py-3 px-6 border-purple-500/50 hover:bg-purple-500/10 text-white">
+                                <Layers size={18} className="text-purple-500" /> + Dept
+                            </Link>
+                        </>
+                    )}
                     <Link to="/admin/add-event" className="btn-primary flex items-center gap-2 py-3 px-6 shadow-lg shadow-primary/20">
                         <Plus size={18} /> New Event
                     </Link>
@@ -153,10 +159,14 @@ const AdminDashboard = () => {
                         <div className="bg-white/5 rounded-3xl p-6 border border-white/5">
                             <h4 className="text-sm font-bold text-gray-400 uppercase mb-4">Quick Management</h4>
                             <div className="space-y-3">
-                                <Link to="/admin/manage?tab=institutes" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group">
-                                    <span className="text-white">Institutes</span>
-                                    <ArrowRight size={18} className="text-gray-500 group-hover:translate-x-1 group-hover:text-primary transition-all" />
-                                </Link>
+                                {user?.isAdmin && (
+                                    <>
+                                        <Link to="/admin/manage?tab=institutes" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group">
+                                            <span className="text-white">Institutes</span>
+                                            <ArrowRight size={18} className="text-gray-500 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                                        </Link>
+                                    </>
+                                )}
                                 <Link to="/admin/manage?tab=departments" className="flex items-center justify-between p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-colors group">
                                     <span className="text-white">Departments</span>
                                     <ArrowRight size={18} className="text-gray-500 group-hover:translate-x-1 group-hover:text-primary transition-all" />
