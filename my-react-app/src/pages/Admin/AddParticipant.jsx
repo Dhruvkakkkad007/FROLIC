@@ -30,7 +30,7 @@ const AddParticipant = () => {
         let tempErrors = {};
         if (!formData.fullName.trim()) tempErrors.fullName = "Full name is required";
         if (!formData.college.trim()) tempErrors.college = "College name is required";
-        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+        if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
             tempErrors.email = "Valid email is required";
         }
         if (!formData.phone.trim() || formData.phone.length < 10) {

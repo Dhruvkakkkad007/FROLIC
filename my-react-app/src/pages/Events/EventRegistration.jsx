@@ -35,7 +35,7 @@ const EventRegistration = ({ event, onSuccess }) => {
         if (!formData.ParticipantEnrollmentNumber.trim()) tempErrors.ParticipantEnrollmentNumber = "Enrollment/ID is required";
         if (!formData.ParticipantInstituteName.trim()) tempErrors.ParticipantInstituteName = "Institute name is required";
         if (!formData.ParticipantMobile.trim() || formData.ParticipantMobile.length < 10) tempErrors.ParticipantMobile = "Valid mobile number is required";
-        if (!formData.ParticipantEmail.trim() || !/^\S+@\S+\.\S+$/.test(formData.ParticipantEmail)) tempErrors.ParticipantEmail = "Valid email is required";
+        if (!formData.ParticipantEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.ParticipantEmail.trim())) tempErrors.ParticipantEmail = "Valid email is required";
         
         setErrors(tempErrors);
         return Object.keys(tempErrors).length === 0;
@@ -160,6 +160,7 @@ const EventRegistration = ({ event, onSuccess }) => {
                     <FormField
                         label="Email Address"
                         name="ParticipantEmail"
+                        type="email"
                         value={formData.ParticipantEmail}
                         onChange={handleChange}
                         error={errors.ParticipantEmail}

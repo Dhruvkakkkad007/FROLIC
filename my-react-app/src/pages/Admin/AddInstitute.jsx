@@ -7,7 +7,6 @@ import { instituteService, userService } from '../../services/api';
 const AddInstitute = () => {
     const [formData, setFormData] = useState({ 
         InstituteName: '', 
-        InstituteImage: '', 
         InstituteDescription: '',
         InstituteCoOrdinatorID: ''
     });
@@ -51,7 +50,7 @@ const AddInstitute = () => {
                 await instituteService.create(formData);
                 setIsSubmitted(true);
                 setTimeout(() => setIsSubmitted(false), 3000);
-                setFormData({ InstituteName: '', InstituteImage: '', InstituteDescription: '', InstituteCoOrdinatorID: '' });
+                setFormData({ InstituteName: '', InstituteDescription: '', InstituteCoOrdinatorID: '' });
             } catch (err) {
                 setErrors({ submit: err.response?.data?.message || "Failed to save institute" });
             } finally {
@@ -90,13 +89,6 @@ const AddInstitute = () => {
                     required
                 />
 
-                <FormField
-                    label="Cover Image URL"
-                    name="InstituteImage"
-                    value={formData.InstituteImage}
-                    onChange={handleChange}
-                    placeholder="https://images.unsplash.com/..."
-                />
 
                 <FormField
                     label="Description"

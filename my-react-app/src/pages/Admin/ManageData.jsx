@@ -83,6 +83,15 @@ const ManageData = () => {
         }
     };
 
+    const handleTogglePayment = async (groupId, currentStatus) => {
+        try {
+            await groupService.update(groupId, { IsPaymentDone: !currentStatus });
+            fetchData();
+        } catch (err) {
+            alert("Payment update failed: " + (err.response?.data?.message || err.message));
+        }
+    };
+
     const tabs = [
         { id: 'institutes', label: 'Institutes', icon: <Building2 size={18} /> },
         { id: 'departments', label: 'Departments', icon: <Layers size={18} /> },
@@ -102,6 +111,9 @@ const ManageData = () => {
             (item.EventName && item.EventName.toLowerCase().includes(query)) ||
             (item.ParticipantName && item.ParticipantName.toLowerCase().includes(query)) ||
             (item.ParticipantEmail && item.ParticipantEmail.toLowerCase().includes(query)) ||
+            (item.ParticipantEnrollmentNumber && item.ParticipantEnrollmentNumber.toLowerCase().includes(query)) ||
+            (item.GroupID?.EventID?.EventName && item.GroupID.EventID.EventName.toLowerCase().includes(query)) ||
+            (item.GroupID?.EventID?.DepartmentID?.DepartmentName && item.GroupID.EventID.DepartmentID.DepartmentName.toLowerCase().includes(query)) ||
             (item.UserName && item.UserName.toLowerCase().includes(query)) ||
             (item.EmailAddress && item.EmailAddress.toLowerCase().includes(query))
         );
@@ -130,11 +142,11 @@ const ManageData = () => {
                     <div className="flex gap-3 w-full md:w-auto">
                         {user?.isAdmin && (
                             <>
-                                <Link to="/admin/add-institute" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-blue-500/30 hover:bg-blue-500/10 text-white">
-                                    <Plus size={18} className="text-blue-500" /> Institute
+                                <Link to="/admin/add-institute" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/5 text-blue-400 group transition-all">
+                                    <Plus size={18} className="text-blue-500 group-hover:scale-110 transition-transform" /> Institute
                                 </Link>
-                                <Link to="/admin/add-department" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-purple-500/30 hover:bg-purple-500/10 text-white">
-                                    <Plus size={18} className="text-purple-500" /> Dept
+                                <Link to="/admin/add-department" className="flex-1 md:flex-none btn-outline flex items-center justify-center gap-2 py-3 px-6 border-purple-500/20 hover:border-purple-500/50 hover:bg-purple-500/5 text-purple-400 group transition-all">
+                                    <Plus size={18} className="text-purple-500 group-hover:scale-110 transition-transform" /> Dept
                                 </Link>
                             </>
                         )}
@@ -148,12 +160,20 @@ const ManageData = () => {
                     <button
                         key={tab.id}
                         onClick={() => { setActiveTab(tab.id); setSearchTerm(''); }}
-                        className={`px-8 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === tab.id ? 'bg-primary text-white shadow-lg' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
+                        className={`px-8 py-3.5 rounded-xl text-sm font-bold transition-all flex items-center gap-3 relative overflow-hidden ${
+                            activeTab === tab.id 
+                            ? 'text-white shadow-[0_0_20px_rgba(233,30,99,0.3)]' 
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
                     >
-                        {tab.icon} {tab.label}
-                        <span className="bg-black/20 px-2 py-0.5 rounded-md text-[10px] ml-1">
-                            {data[tab.id].length}
+                        {activeTab === tab.id && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary animate-in fade-in duration-500"></div>
+                        )}
+                        <span className="relative z-10 flex items-center gap-2">
+                            {tab.icon} {tab.label}
+                            <span className={`${activeTab === tab.id ? 'bg-black/30' : 'bg-white/10'} px-2 py-0.5 rounded-md text-[10px] ml-1`}>
+                                {data[tab.id].length}
+                            </span>
                         </span>
                     </button>
                 ))}
@@ -168,48 +188,93 @@ const ManageData = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/5">
-                                    <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Name</th>
-                                    <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                                        {activeTab === 'events' ? 'Department' : 
-                                         activeTab === 'departments' ? 'Institute' : 
-                                         activeTab === 'participants' ? 'Enrollment' : 
-                                         activeTab === 'users' ? 'Email & Role' : 'Description'}
-                                    </th>
+                                <tr className="bg-white/5 border-b border-white/5 text-left">
+                                    <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest pl-8">Name</th>
+                                    {activeTab === 'participants' ? (
+                                        <>
+                                            <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Enrollment</th>
+                                            <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Event</th>
+                                            <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">Department</th>
+                                            <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-center">Payment</th>
+                                        </>
+                                    ) : (
+                                        <th className="px-6 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                                            {activeTab === 'events' ? 'Department' : 
+                                            activeTab === 'departments' ? 'Institute' : 
+                                            activeTab === 'users' ? 'Email & Role' : 'Description'}
+                                        </th>
+                                    )}
                                     <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentList.length > 0 ? currentList.map((item) => (
                                     <tr key={item._id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-8 py-5">
+                                        <td className="px-6 py-5">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                                                     {(item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName)[0]}
                                                 </div>
-                                                <span className="text-white font-semibold">
-                                                    {item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5 text-sm text-gray-400">
-                                            {activeTab === 'events' ? (item.DepartmentID?.DepartmentName || 'N/A') :
-                                             activeTab === 'departments' ? (item.InstituteID?.InstituteName || 'N/A') :
-                                             activeTab === 'participants' ? (item.ParticipantEnrollmentNumber || 'N/A') :
-                                             activeTab === 'users' ? (
-                                                <div className="flex items-center gap-2">
-                                                    {item.EmailAddress}
-                                                    {item.isAdmin ? (
-                                                        <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-md font-bold">ADMIN</span>
-                                                    ) : item.isCoordinator ? (
-                                                        <span className="bg-purple-500/10 text-purple-500 text-[10px] px-2 py-0.5 rounded-md font-bold">COORDINATOR</span>
-                                                    ) : (
-                                                        <span className="bg-gray-500/10 text-gray-400 text-[10px] px-2 py-0.5 rounded-md font-bold">USER</span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-white font-semibold line-clamp-1">
+                                                        {item.InstituteName || item.DepartmentName || item.EventName || item.ParticipantName || item.UserName}
+                                                    </span>
+                                                    {activeTab === 'participants' && (
+                                                        <span className="text-[10px] text-gray-500 font-medium">{item.ParticipantEmail}</span>
                                                     )}
                                                 </div>
-                                             ) :
-                                             (item.InstituteDescription || 'University Campus')}
+                                            </div>
                                         </td>
+                                        
+                                        {activeTab === 'participants' ? (
+                                            <>
+                                                <td className="px-6 py-5 text-sm text-center">
+                                                    <span className="bg-secondary/10 border border-secondary/30 px-3 py-1.5 rounded-lg text-secondary-light font-mono text-xs shadow-[0_0_10px_rgba(101,31,255,0.1)]">
+                                                        {item.ParticipantEnrollmentNumber}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-5 text-sm text-gray-400">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white font-medium group-hover:text-primary-light transition-colors">{item.GroupID?.EventID?.EventName || 'N/A'}</span>
+                                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{item.GroupID?.GroupName}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-sm">
+                                                    <span className="text-gray-400 group-hover:text-gray-200 transition-colors uppercase text-[10px] font-bold tracking-widest">{item.GroupID?.EventID?.DepartmentID?.DepartmentName || 'N/A'}</span>
+                                                </td>
+                                                <td className="px-6 py-5 text-sm text-center">
+                                                    <button
+                                                        onClick={() => handleTogglePayment(item.GroupID?._id, item.GroupID?.IsPaymentDone)}
+                                                        className="transition-transform active:scale-95 group/status"
+                                                        title="Click to toggle payment status"
+                                                    >
+                                                        {item.GroupID?.IsPaymentDone ? (
+                                                            <span className="bg-emerald-500/10 text-emerald-400 text-[10px] px-3 py-1.5 rounded-full font-black border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)] uppercase tracking-widest cursor-pointer group-hover/status:bg-emerald-500/20 transition-colors">PAID</span>
+                                                        ) : (
+                                                            <span className="bg-rose-500/10 text-rose-400 text-[10px] px-3 py-1.5 rounded-full font-black border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)] uppercase tracking-widest cursor-pointer group-hover/status:bg-rose-500/20 transition-colors">UNPAID</span>
+                                                        )}
+                                                    </button>
+                                                </td>
+                                            </>
+                                        ) : (
+                                            <td className="px-6 py-5 text-sm text-gray-400">
+                                                {activeTab === 'events' ? (item.DepartmentID?.DepartmentName || 'N/A') :
+                                                activeTab === 'departments' ? (item.InstituteID?.InstituteName || 'N/A') :
+                                                activeTab === 'users' ? (
+                                                    <div className="flex items-center gap-2">
+                                                        {item.EmailAddress}
+                                                        {item.isAdmin ? (
+                                                            <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded-md font-bold">ADMIN</span>
+                                                        ) : item.isCoordinator ? (
+                                                            <span className="bg-purple-500/10 text-purple-500 text-[10px] px-2 py-0.5 rounded-md font-bold">COORDINATOR</span>
+                                                        ) : (
+                                                            <span className="bg-gray-500/10 text-gray-400 text-[10px] px-2 py-0.5 rounded-md font-bold">USER</span>
+                                                        )}
+                                                    </div>
+                                                ) :
+                                                (item.InstituteDescription || 'University Campus')}
+                                            </td>
+                                        )}
                                         <td className="px-8 py-5 text-right whitespace-nowrap">
                                             {activeTab === 'users' && (
                                                 <>
@@ -249,7 +314,7 @@ const ManageData = () => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="3" className="px-8 py-20 text-center text-gray-500 italic">
+                                        <td colSpan={activeTab === 'participants' ? 6 : 3} className="px-8 py-20 text-center text-gray-500 italic">
                                             No {activeTab} found matching your search.
                                         </td>
                                     </tr>
