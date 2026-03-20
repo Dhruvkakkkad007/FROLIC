@@ -133,6 +133,18 @@ export const eventService = {
         const response = await api.delete(`/events/${id}`);
         return response.data;
     },
+    getWinners: async (eventId) => {
+        const response = await api.get(`/events/${eventId}/winners`);
+        return response.data;
+    },
+    declareWinner: async (eventId, data) => {
+        const response = await api.post(`/events/${eventId}/winners`, data);
+        return response.data;
+    },
+    getGroups: async (eventId) => {
+        const response = await api.get(`/events/${eventId}/groups`);
+        return response.data.groups;
+    }
 };
 
 export default api;

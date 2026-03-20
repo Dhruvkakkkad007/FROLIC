@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { participantService } from '../../services/api';
-import { Loader2, Ticket, Calendar, Award, User as UserIcon, Users, Mail, Phone, MapPin, Building, GraduationCap, ChevronRight, Activity, Zap } from 'lucide-react';
+import { participantService, eventService } from '../../services/api';
+import { Loader2, Ticket, Calendar, Award, User as UserIcon, Users, Mail, Phone, MapPin, Building, GraduationCap, ChevronRight, Activity, Zap, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ParticipantDashboard = () => {
@@ -9,6 +9,7 @@ const ParticipantDashboard = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [registrations, setRegistrations] = useState([]);
+    const [myWinnings, setMyWinnings] = useState({});
     const [allParticipantsState, setAllParticipants] = useState([]);
     const [stats, setStats] = useState({ events: 0, technical: 0, nonTechnical: 0 });
 
@@ -23,6 +24,23 @@ const ParticipantDashboard = () => {
                 const allParticipants = await participantService.getAll();
                 setAllParticipants(allParticipants);
                 const myRegistrations = allParticipants.filter(p => p.ParticipantEmail === user.EmailAddress);
+                
+                const winningsMap = {};
+                if (myRegistrations.length > 0) {
+                    await Promise.all(myRegistrations.map(async (reg) => {
+                        const eventId = reg.GroupID?.EventID?._id || reg.GroupID?.EventID;
+                        if (eventId) {
+                            try {
+                                const winData = await eventService.getWinners(eventId);
+                                const myWin = winData.winners.find(w => w.GroupID._id === reg.GroupID._id);
+                                if (myWin) {
+                                    winningsMap[reg._id] = myWin.sequence;
+                                }
+                            } catch (e) {}
+                        }
+                    }));
+                }
+                setMyWinnings(winningsMap);
                 setRegistrations(myRegistrations);
 
                 let techCount = 0;
@@ -188,9 +206,25 @@ const ParticipantDashboard = () => {
                                                 </div>
                                                 
                                                 <div className="flex items-center gap-4 sm:flex-col sm:items-end w-full sm:w-auto">
-                                                    <div className="text-left sm:text-right flex-grow">
-                                                        <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-0.5">Status</p>
-                                                        <p className="text-emerald-400 font-bold text-sm bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20 inline-block">Registered</p>
+                                                    <div className="text-left sm:text-right flex-grow flex flex-col items-start sm:items-end gap-3 w-full">
+                                                        <div>
+                                                            <p className="text-[10px] uppercase font-bold tracking-widest text-gray-500 mb-1">Status</p>
+                                                            <p className="text-emerald-400 font-bold text-xs bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 inline-block min-w-[100px] text-center">Registered</p>
+                                                        </div>
+                                                        
+                                                        {myWinnings[reg._id] && (
+                                                            <div>
+                                                                <p className="text-[10px] uppercase font-bold tracking-widest text-gray-400 mb-1">Result</p>
+                                                                <p className={`font-black text-xs px-3 py-1.5 rounded-full border inline-flex items-center gap-1.5 justify-center min-w-[100px] shadow-lg ${
+                                                                    myWinnings[reg._id] === 1 ? 'text-yellow-400 border-yellow-400/50 bg-yellow-400/10 shadow-yellow-400/10' :
+                                                                    myWinnings[reg._id] === 2 ? 'text-gray-300 border-gray-400/50 bg-gray-400/10 shadow-gray-400/10' :
+                                                                    'text-orange-400 border-orange-400/50 bg-orange-400/10 shadow-orange-400/10'
+                                                                }`}>
+                                                                    <Trophy size={14} /> 
+                                                                    {myWinnings[reg._id] === 1 ? '1st Place' : myWinnings[reg._id] === 2 ? '2nd Place' : '3rd Place'}
+                                                                </p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <button onClick={() => navigate('/#events')} className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-colors hidden sm:block">
                                                         <ChevronRight size={20} />

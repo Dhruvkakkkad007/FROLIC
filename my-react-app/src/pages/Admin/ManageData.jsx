@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { instituteService, departmentService, eventService, participantService, userService } from '../../services/api';
-import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon, UserCog, Shield, ShieldOff, Star, StarOff } from 'lucide-react';
+import { Trash2, Building2, Layers, Calendar, Search, Loader2, Plus, Users as UsersIcon, UserCog, Shield, ShieldOff, Star, StarOff, Trophy } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import Modal from '../../components/Modal';
 
 const ManageData = () => {
     const { user } = useAuth();
@@ -49,6 +50,53 @@ const ManageData = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
+    const [selectedWinnerEvent, setSelectedWinnerEvent] = useState(null);
+    const [eventGroups, setEventGroups] = useState([]);
+    const [eventWinners, setEventWinners] = useState([]);
+    const [winnerFormData, setWinnerFormData] = useState({ 1: '', 2: '', 3: '' });
+    const [winnerLoading, setWinnerLoading] = useState(false);
+
+    const handleWinnerClick = async (event) => {
+        setSelectedWinnerEvent(event);
+        setIsWinnerModalOpen(true);
+        setWinnerLoading(true);
+        try {
+            const groups = await eventService.getGroups(event._id);
+            setEventGroups(groups);
+            
+            try {
+                const winnersData = await eventService.getWinners(event._id);
+                setEventWinners(winnersData.winners);
+                const prefill = { 1: '', 2: '', 3: '' };
+                winnersData.winners.forEach(w => {
+                    prefill[w.sequence] = w.GroupID._id;
+                });
+                setWinnerFormData(prefill);
+            } catch (err) {
+                setEventWinners([]);
+                setWinnerFormData({ 1: '', 2: '', 3: '' });
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setWinnerLoading(false);
+        }
+    };
+
+    const handleDeclareWinner = async (sequence) => {
+        const groupID = winnerFormData[sequence];
+        if (!groupID) return alert('Please Select a Group First before declaring the winner.');
+        
+        try {
+            await eventService.declareWinner(selectedWinnerEvent._id, { GroupID: groupID, sequence });
+            alert(`Position ${sequence} declared !`);
+            handleWinnerClick(selectedWinnerEvent); 
+        } catch (err) {
+            alert(err.response?.data?.message || err.message);
+        }
+    };
 
     const handleDelete = async (type, id, name) => {
         if (window.confirm(`Permanently remove "${name}" and all its related data?`)) {
@@ -296,6 +344,15 @@ const ManageData = () => {
                                                     </button>
                                                 </>
                                             )}
+                                            {(user?.isAdmin || user?.isCoordinator) && activeTab === 'events' && (
+                                                <button
+                                                    onClick={() => handleWinnerClick(item)}
+                                                    className="p-3 mr-2 text-gray-500 hover:text-white hover:bg-yellow-500/20 hover:text-yellow-400 rounded-xl transition-all"
+                                                    title="Declare Event Winners"
+                                                >
+                                                    <Trophy size={18} />
+                                                </button>
+                                            )}
                                             {(user?.isAdmin || (activeTab === 'events' || activeTab === 'departments' || activeTab === 'participants')) && (
                                                 <button
                                                     onClick={() => handleDelete(
@@ -326,6 +383,68 @@ const ManageData = () => {
                     </div>
                 </div>
             )}
+
+            <Modal isOpen={isWinnerModalOpen} onClose={() => setIsWinnerModalOpen(false)} title={`Declare Winners - ${selectedWinnerEvent?.EventName}`}>
+                {winnerLoading ? (
+                    <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-primary w-12 h-12" /></div>
+                ) : (
+                    <div className="space-y-6">
+                        <p className="text-gray-400 text-sm">Select the participating teams and announce the official event winners.</p>
+                        
+                        {[1, 2, 3].map((seq) => {
+                            const existingWinner = eventWinners.find(w => w.sequence === seq);
+                            const positionNames = { 1: '1st Place Winner', 2: '2nd Place Runner Up', 3: '3rd Place Runner Up' };
+                            const positionColors = { 1: 'text-yellow-400', 2: 'text-gray-300', 3: 'text-orange-400' };
+
+                            return (
+                                <div key={seq} className="p-5 glass-dark border border-white/5 rounded-2xl flex flex-col gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <Trophy size={18} className={positionColors[seq]} />
+                                        <h4 className={`text-sm font-bold uppercase tracking-wider ${positionColors[seq]}`}>{positionNames[seq]}</h4>
+                                    </div>
+
+                                    {existingWinner ? (
+                                        <div className="bg-white/5 py-3 px-4 rounded-xl flex items-center justify-between border border-white/10">
+                                            <div>
+                                                <p className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">Declared Winner</p>
+                                                <p className="text-white font-bold">{existingWinner.GroupID?.GroupName}</p>
+                                            </div>
+                                            <div className="bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">Official</div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <select
+                                                value={winnerFormData[seq]}
+                                                onChange={(e) => setWinnerFormData({ ...winnerFormData, [seq]: e.target.value })}
+                                                className="flex-grow bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm appearance-none cursor-pointer"
+                                            >
+                                                <option value="" disabled className="bg-gray-900 text-gray-500">Choose a Participating Group / Individual...</option>
+                                                {eventGroups.map(group => {
+                                                    const groupParticipants = data.participants.filter(p => (p.GroupID?._id || p.GroupID) === group._id);
+                                                    const leader = groupParticipants.find(p => p.IsGroupLeader) || groupParticipants[0];
+                                                    const leaderInfo = leader ? ` (Leader: ${leader.ParticipantName} - ${leader.ParticipantEnrollmentNumber})` : '';
+                                                    
+                                                    return (
+                                                        <option key={group._id} value={group._id} className="bg-gray-900 text-white">
+                                                            Team: {group.GroupName}{leaderInfo}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </select>
+                                            <button
+                                                onClick={() => handleDeclareWinner(seq)}
+                                                className="bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-colors py-3 px-6 rounded-xl font-bold text-sm"
+                                            >
+                                                Declare
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };

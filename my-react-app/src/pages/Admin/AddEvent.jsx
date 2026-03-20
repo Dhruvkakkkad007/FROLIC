@@ -54,7 +54,11 @@ const AddEvent = ({ isModal = false, onSuccess }) => {
                 }
                 
                 if (Array.isArray(userData)) {
-                    setUsers(userData.map(u => ({ label: `${u.UserName} (${u.EmailAddress})`, value: u._id })));
+                    const adminsAndCoordinators = userData.filter(u => u.isAdmin || u.isCoordinator);
+                    setUsers(adminsAndCoordinators.map(u => ({ 
+                        label: `${u.UserName} (${u.isAdmin ? 'Admin' : 'Coordinator'})`, 
+                        value: u._id 
+                    })));
                 }
 
                 if ((!deptData || deptData.length === 0) && (!userData || userData.length === 0)) {
