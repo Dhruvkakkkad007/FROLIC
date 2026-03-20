@@ -144,6 +144,10 @@ export const eventService = {
     getGroups: async (eventId) => {
         const response = await api.get(`/events/${eventId}/groups`);
         return response.data.groups;
+    },
+    removeWinner: async (eventId, sequence) => {
+        const response = await api.delete(`/events/${eventId}/winners/${sequence}`);
+        return response.data;
     }
 };
 

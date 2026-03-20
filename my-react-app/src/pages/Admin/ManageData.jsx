@@ -98,6 +98,16 @@ const ManageData = () => {
         }
     };
 
+    const handleRemoveWinner = async (sequence) => {
+        if (!window.confirm(`Are you sure you want to revoke the winner for Position ${sequence}?`)) return;
+        try {
+            await eventService.removeWinner(selectedWinnerEvent._id, sequence);
+            handleWinnerClick(selectedWinnerEvent); 
+        } catch (err) {
+            alert(err.response?.data?.message || err.message);
+        }
+    };
+
     const handleDelete = async (type, id, name) => {
         if (window.confirm(`Permanently remove "${name}" and all its related data?`)) {
             try {
@@ -409,7 +419,15 @@ const ManageData = () => {
                                                 <p className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">Declared Winner</p>
                                                 <p className="text-white font-bold">{existingWinner.GroupID?.GroupName}</p>
                                             </div>
-                                            <div className="bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">Official</div>
+                                            <div className="flex gap-2 items-center">
+                                                <div className="bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">Official</div>
+                                                <button 
+                                                    onClick={() => handleRemoveWinner(seq)}
+                                                    className="bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg"
+                                                >
+                                                    Revoke
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-3">

@@ -442,4 +442,29 @@ router.post("/:id/winners", authMiddleware, async (req, res) => {
     }
 })
 
+router.delete("/:id/winners/:sequence", authMiddleware, async (req, res) => {
+    try {
+        const { id, sequence } = req.params;
+        const isAdmin = req.user.isAdmin;
+        const isCoordinator = req.user.isCoordinator;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid Event ID" });
+        }
+
+        const event = await Event.findById(id);
+        if (!event) return res.status(404).json({ message: "Event not found" });
+
+        const isEventCoOrdinator = event.EventCoOrdinatorID.toString() === req.user.id;
+        if (!isAdmin && !isCoordinator && !isEventCoOrdinator) {
+            return res.status(403).json({ message: "Unauthorized" });
+        }
+
+        await EventWiseWinners.findOneAndDelete({ EventID: id, sequence: parseInt(sequence) });
+        res.status(200).json({ message: "Winner removed successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
 module.exports = router;
