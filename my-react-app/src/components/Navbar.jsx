@@ -134,10 +134,10 @@ const Navbar = () => {
 
                     {user ? (
                         <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-2 group px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                                <User size={16} className="text-primary" />
+                            <Link to={hasAdminAccess ? "/admin/dashboard" : "/profile"} className="flex items-center gap-2 group px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                                <User size={16} className="text-primary group-hover:scale-110 transition-transform" />
                                 <span className="text-xs font-bold text-white">{user.UserName}</span>
-                            </div>
+                            </Link>
                             <button 
                                 onClick={handleLogout}
                                 className="text-gray-400 hover:text-primary transition-colors flex items-center gap-1 text-sm font-bold"

@@ -24,16 +24,23 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Participant Name, Enrollment Number, and Group ID are required" });
     }
 
-    // Check if participant with this enrollment number already exists
-    const existingParticipant = await Participant.findOne({ ParticipantEnrollmentNumber });
-    if (existingParticipant) {
-      return res.status(400).json({ message: `Participant with enrollment number ${ParticipantEnrollmentNumber} is already registered.` });
-    }
-
-    // Validate if Group exists
+    // Validate if Group exists first to get the EventID
     const groupExists = await Group.findById(GroupID);
     if (!groupExists) {
       return res.status(404).json({ message: "The specified group does not exist." });
+    }
+
+    // Check if participant with this enrollment number is already registered FOR THIS EVENT
+    const eventGroups = await Group.find({ EventID: groupExists.EventID });
+    const eventGroupIds = eventGroups.map(g => g._id);
+
+    const alreadyRegistered = await Participant.findOne({
+      ParticipantEnrollmentNumber,
+      GroupID: { $in: eventGroupIds }
+    });
+
+    if (alreadyRegistered) {
+      return res.status(400).json({ message: `Participant with enrollment number ${ParticipantEnrollmentNumber} is already registered for this event.` });
     }
 
     const participant = await Participant.create({

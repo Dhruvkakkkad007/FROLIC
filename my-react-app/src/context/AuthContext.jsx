@@ -14,6 +14,14 @@ export const AuthProvider = ({ children }) => {
         return userData;
     };
 
+    const register = async (userData) => {
+        await authService.register(userData);
+        const loginCredentials = {
+            EmailAddress: userData.EmailAddress,
+            UserPassword: userData.UserPassword
+        };
+        return await login(loginCredentials);
+    };
 
     const logout = async () => {
         try {
@@ -41,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, register }}>
             {!loading && children}
         </AuthContext.Provider>
     );

@@ -7,8 +7,7 @@ const participantSchema= mongoose.Schema({
     },
     ParticipantEnrollmentNumber: {
         type:String,
-        required: true,
-        unique: true
+        required: true
     },
     ParticipantInstituteName: String,
     ParticipantCity: String,

@@ -139,6 +139,7 @@ const AllParticipants = () => {
                     >
                         <Download size={18} /> Export CSV
                     </button>
+                    
                 </div>
             </div>
 
@@ -187,11 +188,11 @@ const AllParticipants = () => {
                                             <div className="space-y-1.5">
                                                 <div className="flex items-center gap-2 text-sm text-gray-400">
                                                     <Filter size={14} className="text-primary" />
-                                                    {p.ParticipantEmail}
+                                                    { p.ParticipantEmail }
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm text-gray-400">
                                                     <Filter size={14} className="text-primary" />
-                                                    {p.ParticipantMobile}
+                                                    { p.ParticipantMobile }
                                                 </div>
                                             </div>
                                         </td>
@@ -199,7 +200,7 @@ const AllParticipants = () => {
                                             <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 rounded-xl border border-primary/20">
                                                 <Calendar size={14} className="text-primary" />
                                                 <span className="text-sm font-bold text-white">
-                                                    {p.GroupID?.EventID?.EventName || 'Unassigned'}
+                                                    { p.GroupID?.EventID?.EventName || 'Unassigned'}
                                                 </span>
                                             </div>
                                         </td>

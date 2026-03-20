@@ -42,8 +42,8 @@ const Dashboard = () => {
     const [stats, setStats] = useState({
         location: 'Darshan University',
         date: '22-24 March 2025',
-        eventsCount: '30+',
-        participantsCount: '5000+'
+        eventsCount: '0 Events',
+        participantsCount: '0 Students'
     });
 
     useEffect(() => {
@@ -60,7 +60,7 @@ const Dashboard = () => {
 
                 if (eventsData.status === 'fulfilled') {
                     setEvents(eventsData.value);
-                    newStats.eventsCount = `${eventsData.value.length}+ Events`;
+                    newStats.eventsCount = `${eventsData.value.length} Events`;
                 }
 
                 if (departmentsData.status === 'fulfilled') {
@@ -68,8 +68,7 @@ const Dashboard = () => {
                 }
 
                 if (participantsData.status === 'fulfilled') {
-                    const realCount = participantsData.value.length;
-                    newStats.participantsCount = realCount > 50 ? `${realCount}+ Students` : `5000+ Students`;
+                    newStats.participantsCount = `${participantsData.value.length} Students`;
                 }
 
                 setStats(newStats);
@@ -371,11 +370,11 @@ const Dashboard = () => {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-2">Full Name</label>
-                                        <input type="text" placeholder="John Doe" className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                                        <input type="text" placeholder="Enter Full Name" className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs font-bold text-gray-400 uppercase ml-2">Email</label>
-                                        <input type="email" placeholder="john@example.com" className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
+                                        <input type="email" placeholder="Enter Email" className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">

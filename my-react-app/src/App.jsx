@@ -6,6 +6,7 @@ import Login from './pages/Login/Login';
 import Institutes from './pages/Institutes/Institutes';
 import Departments from './pages/Departments/Departments';
 import Events from './pages/Events/Events';
+import ParticipantDashboard from './pages/ParticipantDashboard/ParticipantDashboard';
 
 // Admin/Form Pages
 import AddInstitute from './pages/Admin/AddInstitute';
@@ -32,6 +33,7 @@ function App() {
           {/* Main Routes */}
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="profile" element={<ParticipantDashboard />} />
             <Route path="institutes" element={<Institutes />} />
             <Route path="departments" element={<Departments />} />
             <Route path="events" element={<Events />} />

@@ -16,11 +16,7 @@ const seed = async () => {
         await mongoose.connect(MONGO_URI);
         console.log("DB Connected.");
 
-        // Clean existing data (Optional - uncomment if you want a fresh start)
-        // await User.deleteMany({});
-        // await Institute.deleteMany({});
-        // await Department.deleteMany({});
-        // await Event.deleteMany({});
+     
 
         // 1. Create Admin User
         const existingAdmin = await User.findOne({ EmailAddress: "admin@frolic.com" });

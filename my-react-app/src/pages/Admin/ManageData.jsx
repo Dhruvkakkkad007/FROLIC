@@ -208,6 +208,7 @@ const ManageData = () => {
                                 </tr>
                             </thead>
                             <tbody>
+
                                 {currentList.length > 0 ? currentList.map((item) => (
                                     <tr key={item._id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
                                         <td className="px-6 py-5">
@@ -258,7 +259,8 @@ const ManageData = () => {
                                             </>
                                         ) : (
                                             <td className="px-6 py-5 text-sm text-gray-400">
-                                                {activeTab === 'events' ? (item.DepartmentID?.DepartmentName || 'N/A') :
+                                                {
+                                                activeTab === 'events' ? (item.DepartmentID?.DepartmentName || 'N/A') :
                                                 activeTab === 'departments' ? (item.InstituteID?.InstituteName || 'N/A') :
                                                 activeTab === 'users' ? (
                                                     <div className="flex items-center gap-2">
