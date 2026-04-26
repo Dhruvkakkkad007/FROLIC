@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 
 router.get("/", async (req, res) => {
     try {
-        const departments = await Department.find();
+        const departments = await Department.find().populate("InstituteID", "InstituteName");
 
         res.status(200).json({ departments });
     }

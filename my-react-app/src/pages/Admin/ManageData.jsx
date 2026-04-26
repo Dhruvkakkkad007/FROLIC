@@ -165,7 +165,9 @@ const ManageData = () => {
         const query = searchTerm.toLowerCase();
         return (
             (item.InstituteName && item.InstituteName.toLowerCase().includes(query)) ||
+            (item.InstituteID?.InstituteName && item.InstituteID.InstituteName.toLowerCase().includes(query)) ||
             (item.DepartmentName && item.DepartmentName.toLowerCase().includes(query)) ||
+            (item.DepartmentID?.DepartmentName && item.DepartmentID.DepartmentName.toLowerCase().includes(query)) ||
             (item.EventName && item.EventName.toLowerCase().includes(query)) ||
             (item.ParticipantName && item.ParticipantName.toLowerCase().includes(query)) ||
             (item.ParticipantEmail && item.ParticipantEmail.toLowerCase().includes(query)) ||

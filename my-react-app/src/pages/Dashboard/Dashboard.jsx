@@ -21,6 +21,30 @@ import { useAuth } from '../../context/AuthContext';
 import { eventService, participantService, instituteService, departmentService } from '../../services/api';
 import Modal from '../../components/Modal';
 import EventRegistration from '../Events/EventRegistration';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 15
+        }
+    }
+};
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -95,51 +119,84 @@ const Dashboard = () => {
             {/* Hero Section */}
             <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
                 <div className="absolute inset-0 z-0">
-                    <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/30 rounded-full blur-[120px] animate-pulse"></div>
-                    <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-[120px] animate-pulse delay-700"></div>
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+                        className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/30 rounded-full blur-[120px]"
+                    ></motion.div>
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 2, delay: 1, repeat: Infinity, repeatType: "reverse" }}
+                        className="absolute bottom-1/4 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-[120px]"
+                    ></motion.div>
                 </div>
 
                 <div className="container mx-auto px-6 relative z-10">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-dark border border-white/10 mb-10 animate-in fade-in slide-in-from-bottom-6 duration-1000 shadow-[0_0_15px_rgba(233,30,99,0.2)]">
+                    <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="max-w-4xl mx-auto text-center"
+                    >
+                        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-dark border border-white/10 mb-10 shadow-[0_0_15px_rgba(233,30,99,0.2)]">
                             <span className="relative flex h-2.5 w-2.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
                             </span>
                             <span className="text-xs font-bold text-white tracking-[0.2em] uppercase">Registration Live • Frolic 2025</span>
-                        </div>
+                        </motion.div>
 
-                        <h1 className="text-5xl md:text-8xl font-display font-extrabold text-white mb-8 tracking-tighter leading-[1.05] animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+                        <motion.h1 variants={itemVariants} className="text-5xl md:text-8xl font-display font-extrabold text-white mb-8 tracking-tighter leading-[1.05]">
                             {user ? (
                                 <>Welcome back, <br /><span className="text-gradient uppercase">{user.UserName}!</span></>
                             ) : (
                                 <>CHALLENGE YOUR <br /><span className="text-gradient uppercase">POTENTIAL.</span></>
                             )}
-                        </h1>
+                        </motion.h1>
 
-                        <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500 leading-relaxed font-sans font-light">
+                        <motion.p variants={itemVariants} className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed font-sans font-light">
                             Join the ultimate technical and cultural symposium. Unleash your innovation, compete with the best, and redefine excellence in the heart of Frolic.
-                        </p>
+                        </motion.p>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-700">
-                            <button onClick={() => document.getElementById('events').scrollIntoView({ behavior: 'smooth' })} className="btn-primary py-5 px-12 text-lg flex items-center gap-3 group shadow-[0_10px_30px_rgba(233,30,99,0.4)]">
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-8">
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => document.getElementById('events').scrollIntoView({ behavior: 'smooth' })} 
+                                className="btn-primary py-5 px-12 text-lg flex items-center gap-3 group shadow-[0_10px_30px_rgba(233,30,99,0.4)]"
+                            >
                                 <Sparkles size={20} /> Explore Events <ArrowRight className="group-hover:translate-x-1.5 transition-transform" />
-                            </button>
+                            </motion.button>
                             {!user && (
-                                <Link to="/login" className="btn-outline py-5 px-12 text-lg">
-                                    Join the Community
-                                </Link>
+                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <Link to="/login" className="btn-outline py-5 px-12 text-lg">
+                                        Join the Community
+                                    </Link>
+                                </motion.div>
                             )}
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1, duration: 1 }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce opacity-40"
+                >
                     <div className="w-1 h-12 rounded-full bg-gradient-to-b from-primary to-transparent"></div>
-                </div>
+                </motion.div>
             </section>
 
             {/* Stats Section */}
-            <section className="container mx-auto px-6">
+            <motion.section 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={containerVariants}
+                className="container mx-auto px-6"
+            >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     {[
                         { icon: <MapPin className="text-primary" />, label: "Location", val: stats.location },
@@ -147,52 +204,89 @@ const Dashboard = () => {
                         { icon: <Trophy className="text-primary" />, label: "Events", val: stats.eventsCount },
                         { icon: <Users className="text-primary" />, label: "Participants", val: stats.participantsCount }
                     ].map((stat, i) => (
-                        <div key={i} className="glass p-8 rounded-3xl text-center border border-white/5 hover:border-primary/30 transition-colors">
+                        <motion.div 
+                            key={i} 
+                            variants={itemVariants}
+                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                            className="glass p-8 rounded-3xl text-center border border-white/5 hover:border-primary/30 transition-colors"
+                        >
                             <div className="flex justify-center mb-4">{stat.icon}</div>
                             <p className="text-sm text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
                             <h4 className="text-xl font-bold text-white font-display">{stat.val}</h4>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
-            </section>
+            </motion.section>
 
             {/* Departments Filter & Events List */}
             <section id="events" className="container mx-auto px-6 scroll-mt-32">
-                <div className="text-center mb-12">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-12"
+                >
                     <h2 className="text-4xl font-display font-bold text-white mb-6">Our Events</h2>
 
                     {/* Department Navigation (As per Photo) */}
                     <div className="flex flex-wrap justify-center gap-4 md:gap-8 mb-16 border-b border-white/5 pb-6 overflow-x-auto no-scrollbar">
-                        <button
+                        <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => setActiveDept('all')}
                             className={`text-sm md:text-base font-bold uppercase tracking-wider transition-all relative ${activeDept === 'all' ? 'text-primary' : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             Show All
-                            {activeDept === 'all' && <div className="absolute -bottom-6 left-0 right-0 h-1 bg-primary rounded-full"></div>}
-                        </button>
+                            {activeDept === 'all' && (
+                                <motion.div 
+                                    layoutId="activeDept"
+                                    className="absolute -bottom-6 left-0 right-0 h-1 bg-primary rounded-full"
+                                ></motion.div>
+                            )}
+                        </motion.button>
                         {departments.map((dept) => (
-                            <button
+                            <motion.button
                                 key={dept._id}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
                                 onClick={() => setActiveDept(dept._id)}
                                 className={`text-sm md:text-base font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${activeDept === dept._id ? 'text-primary' : 'text-gray-400 hover:text-white'
                                     }`}
                             >
                                 {dept.DepartmentName}
-                                {activeDept === dept._id && <div className="absolute -bottom-6 left-0 right-0 h-1 bg-primary rounded-full"></div>}
-                            </button>
+                                {activeDept === dept._id && (
+                                    <motion.div 
+                                        layoutId="activeDept"
+                                        className="absolute -bottom-6 left-0 right-0 h-1 bg-primary rounded-full"
+                                    ></motion.div>
+                                )}
+                            </motion.button>
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <motion.div 
+                    layout
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+                >
                     {loading ? (
                         [1, 2, 3, 4].map(i => (
                             <div key={i} className="h-[500px] glass rounded-3xl animate-pulse"></div>
                         ))
                     ) : filteredEvents.length > 0 ? (
                         filteredEvents.map((event) => (
-                            <div key={event._id} className="group flex flex-col glass-dark border border-white/10 rounded-[2rem] overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(233,30,99,0.15)] h-full">
+                            <motion.div 
+                                layout
+                                key={event._id} 
+                                variants={itemVariants}
+                                whileHover={{ y: -8, transition: { duration: 0.4 } }}
+                                className="group flex flex-col glass-dark border border-white/10 rounded-[2rem] overflow-hidden transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(233,30,99,0.15)] h-full"
+                            >
                                 {/* Event Card Image Container */}
                                 <div className="relative aspect-[4/5] overflow-hidden m-4 rounded-[1.5rem]">
                                     <img
@@ -218,35 +312,47 @@ const Dashboard = () => {
 
                                     {/* Action Icons */}
                                     <div className="mt-auto flex items-center justify-between text-gray-500">
-                                        <button className="hover:text-primary transition-colors">
+                                        <motion.button whileHover={{ scale: 1.2, color: '#e91e63' }} className="transition-colors">
                                             <List size={22} strokeWidth={1.5} />
-                                        </button>
-                                        <button
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.2, color: '#e91e63' }}
                                             onClick={() => handleRegisterClick(event)}
-                                            className="hover:text-primary transition-colors"
+                                            className="transition-colors"
                                         >
                                             <LinkIcon size={22} strokeWidth={1.5} />
-                                        </button>
+                                        </motion.button>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))
                     ) : (
-                        <div className="col-span-full py-20 text-center glass rounded-[2.5rem]">
+                        <motion.div variants={itemVariants} className="col-span-full py-20 text-center glass rounded-[2.5rem]">
                             <p className="text-gray-400 text-lg">No events found for this category.</p>
-                        </div>
+                        </motion.div>
                     )}
-                </div>
+                </motion.div>
             </section>
 
             {/* Rules Section */}
             <section id="rules" className="container mx-auto px-6 scroll-mt-32">
                 <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-16">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
                         <h2 className="text-4xl font-display font-bold text-white mb-4">Event Rules & Guidelines</h2>
                         <p className="text-gray-400">Please read carefully to ensure a fair and exciting competition for everyone.</p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    </motion.div>
+                    <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    >
                         {[
                             { title: "Registration", desc: "All participants must register through the official portal before the deadline." },
                             { title: "ID Cards", desc: "Students must carry their college ID cards at all times during the event." },
@@ -255,7 +361,12 @@ const Dashboard = () => {
                             { title: "Deadlines", desc: "Reporting time for events is 30 minutes prior to the scheduled start." },
                             { title: "Decision", desc: "The judge's decision will be final and binding for all participants." }
                         ].map((rule, i) => (
-                            <div key={i} className="glass p-8 rounded-3xl border border-white/5 flex gap-5">
+                            <motion.div 
+                                key={i} 
+                                variants={itemVariants}
+                                whileHover={{ scale: 1.02 }}
+                                className="glass p-8 rounded-3xl border border-white/5 flex gap-5"
+                            >
                                 <div className="p-3 bg-primary/10 rounded-2xl h-fit">
                                     <ShieldCheck className="text-primary" size={24} />
                                 </div>
@@ -263,20 +374,31 @@ const Dashboard = () => {
                                     <h4 className="text-lg font-bold text-white mb-2">{rule.title}</h4>
                                     <p className="text-gray-400 text-sm leading-relaxed">{rule.desc}</p>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* FAQs Section */}
             <section id="faqs" className="container mx-auto px-6 scroll-mt-32">
                 <div className="max-w-3xl mx-auto">
-                    <div className="text-center mb-16">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-16"
+                    >
                         <h2 className="text-4xl font-display font-bold text-white mb-4">Frequently Asked Questions</h2>
                         <p className="text-gray-400">Everything you need to know about Frolic 2025.</p>
-                    </div>
-                    <div className="space-y-4">
+                    </motion.div>
+                    <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        className="space-y-4"
+                    >
                         {[
                             { q: "Who can participate in Frolic?", a: "Frolic is open to all university and college students across the country." },
                             { q: "How many events can I register for?", a: "You can register for as many events as long as their timings don't overlap." },
@@ -284,27 +406,46 @@ const Dashboard = () => {
                             { q: "Will I get a certificate?", a: "All participants will receive a certificate of participation. Winners get special merit certificates." },
                             { q: "How do I reach Darshan University?", a: "Bus facilities will be provided from major city points. Check the facilities section for details." }
                         ].map((faq, i) => (
-                            <details key={i} className="glass-dark border border-white/10 rounded-2xl group overflow-hidden">
+                            <motion.details 
+                                key={i} 
+                                variants={itemVariants}
+                                className="glass-dark border border-white/10 rounded-2xl group overflow-hidden"
+                            >
                                 <summary className="p-6 cursor-pointer flex justify-between items-center text-white font-bold select-none list-none">
                                     {faq.q}
                                     <HelpCircle className="text-gray-500 group-open:text-primary transition-colors" size={20} />
                                 </summary>
-                                <div className="p-6 pt-0 text-gray-400 text-sm border-t border-white/5">
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    className="p-6 pt-0 text-gray-400 text-sm border-t border-white/5"
+                                >
                                     {faq.a}
-                                </div>
-                            </details>
+                                </motion.div>
+                            </motion.details>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Facilities Section */}
             <section id="facilities" className="container mx-auto px-6 scroll-mt-32">
-                <div className="text-center mb-16">
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center mb-16"
+                >
                     <h2 className="text-4xl font-display font-bold text-white mb-4">Campus Facilities</h2>
                     <p className="text-gray-400">We ensure a comfortable and productive environment for all participants.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                </motion.div>
+                <motion.div 
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
                     {[
                         { icon: <Zap className="text-yellow-400" />, title: "High-Speed Wi-Fi", desc: "Dedicated high-speed internet access across all event venues for participants." },
                         { icon: <Users className="text-green-400" />, title: "Food Courts", desc: "Multiple food stalls and a main cafeteria serving a variety of cuisines." },
@@ -313,59 +454,62 @@ const Dashboard = () => {
                         { icon: <Info className="text-purple-400" />, title: "Help Desk", desc: "Information centers at every major building to guide you through the event." },
                         { icon: <Trophy className="text-primary" />, title: "Rest Zones", desc: "Comfortable lounges and rest areas to recharge between your events." }
                     ].map((facility, i) => (
-                        <div key={i} className="glass-dark p-8 rounded-3xl border border-white/5 hover:border-white/20 transition-all text-center group">
+                        <motion.div 
+                            key={i} 
+                            variants={itemVariants}
+                            whileHover={{ y: -10 }}
+                            className="glass-dark p-8 rounded-3xl border border-white/5 hover:border-white/20 transition-all text-center group"
+                        >
                             <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                                 {facility.icon}
                             </div>
                             <h4 className="text-xl font-bold text-white mb-3">{facility.title}</h4>
                             <p className="text-gray-400 text-sm leading-relaxed">{facility.desc}</p>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </section>
 
             {/* Contact Section */}
             <section id="contact" className="container mx-auto px-6 scroll-mt-32">
-                <div className="glass-dark rounded-[3rem] p-12 border border-white/10 overflow-hidden relative">
+                <motion.div 
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="glass-dark rounded-[3rem] p-12 border border-white/10 overflow-hidden relative"
+                >
                     <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -mr-48 -mt-48"></div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10">
-                        <div>
-                            <h2 className="text-4xl font-display font-bold text-white mb-6">Get in Touch</h2>
-                            <p className="text-gray-400 mb-12">Have any questions? Our team is here to help you. Reach out through any of these channels.</p>
+                        <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+                            <motion.h2 variants={itemVariants} className="text-4xl font-display font-bold text-white mb-6">Get in Touch</motion.h2>
+                            <motion.p variants={itemVariants} className="text-gray-400 mb-12">Have any questions? Our team is here to help you. Reach out through any of these channels.</motion.p>
 
                             <div className="space-y-8">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center text-primary">
-                                        <Mail size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Email Us</p>
-                                        <p className="text-white font-semibold">frolic@darshan.ac.in</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center text-primary">
-                                        <Phone size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Call Us</p>
-                                        <p className="text-white font-semibold">+91 98765 43210</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center text-primary">
-                                        <MapPin size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Location</p>
-                                        <p className="text-white font-semibold">Darshan University, Rajkot-Morbi Highway, Rajkot.</p>
-                                    </div>
-                                </div>
+                                {[
+                                    { icon: <Mail size={24} />, label: "Email Us", val: "frolic@darshan.ac.in" },
+                                    { icon: <Phone size={24} />, label: "Call Us", val: "+91 98765 43210" },
+                                    { icon: <MapPin size={24} />, label: "Location", val: "Darshan University, Rajkot-Morbi Highway, Rajkot." }
+                                ].map((c, i) => (
+                                    <motion.div key={i} variants={itemVariants} className="flex items-center gap-6">
+                                        <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center text-primary">
+                                            {c.icon}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">{c.label}</p>
+                                            <p className="text-white font-semibold">{c.val}</p>
+                                        </div>
+                                    </motion.div>
+                                ))}
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="glass p-8 rounded-[2rem] border border-white/10">
+                        <motion.div 
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="glass p-8 rounded-[2rem] border border-white/10"
+                        >
                             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div className="space-y-2">
@@ -385,11 +529,17 @@ const Dashboard = () => {
                                     <label className="text-xs font-bold text-gray-400 uppercase ml-2">Message</label>
                                     <textarea rows="4" placeholder="Your message here..." className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-6 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"></textarea>
                                 </div>
-                                <button className="btn-primary w-full py-5 font-bold shadow-lg shadow-primary/20">Send Message</button>
+                                <motion.button 
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="btn-primary w-full py-5 font-bold shadow-lg shadow-primary/20"
+                                >
+                                    Send Message
+                                </motion.button>
                             </form>
-                        </div>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             </section>
 
             {/* Registration Modal */}
