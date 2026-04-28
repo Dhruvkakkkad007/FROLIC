@@ -3,13 +3,26 @@ import { authService } from '../services/api';
 
 const AuthContext = createContext();
 
+const normalizeUser = (userData) => {
+    if (!userData) {
+        return null;
+    }
+
+    return {
+        ...userData,
+        isAdmin: Boolean(userData.isAdmin),
+        isCoordinator: Boolean(userData.isCoordinator),
+        role: userData.role || (userData.isAdmin ? 'admin' : userData.isCoordinator ? 'coordinator' : 'user')
+    };
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const login = async (credentials) => {
         await authService.login(credentials);
-        const userData = await authService.getMe();
+        const userData = normalizeUser(await authService.getMe());
         setUser(userData);
         return userData;
     };
@@ -35,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
     const checkAuthStatus = async () => {
         try {
-            const userData = await authService.getMe();
+            const userData = normalizeUser(await authService.getMe());
             setUser(userData);
         } catch (error) {
             setUser(null);

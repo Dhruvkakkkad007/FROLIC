@@ -6,12 +6,28 @@ const authMiddleware=require("../middleware/authMiddleware");
 
 const router=express.Router();
 
+const formatUserResponse = (user) => ({
+    id: user._id,
+    username: user.UserName,
+    email: user.EmailAddress,
+    phoneNumber: user.PhoneNumber,
+    isAdmin: Boolean(user.isAdmin),
+    isCoordinator: Boolean(user.isCoordinator),
+    role: user.isAdmin ? "admin" : user.isCoordinator ? "coordinator" : "user"
+});
+
 router.post("/register", async(req,res)=>{
     try{
-        const {UserName, UserPassword, EmailAddress, PhoneNumber, isAdmin}= req.body;
+        const {UserName, UserPassword, EmailAddress, PhoneNumber, role}= req.body;
 
-        if (!UserName || !UserPassword || !EmailAddress || !PhoneNumber || isAdmin===undefined) {
+        if (!UserName || !UserPassword || !EmailAddress || !PhoneNumber || !role) {
             return res.status(400).json({message: "Missing Credentials"})
+        }
+
+        const normalizedRole = String(role).toLowerCase();
+
+        if (!["admin", "user"].includes(normalizedRole)) {
+            return res.status(400).json({message: "Invalid role selected"});
         }
 
         const userExists= await User.findOne({EmailAddress});
@@ -28,15 +44,11 @@ router.post("/register", async(req,res)=>{
             UserPassword: hashedPassword,
             EmailAddress,
             PhoneNumber,
-            isAdmin
+            isAdmin: normalizedRole === "admin"
         });
 
         res.json({message: "User created successfully", 
-            newUser: {
-                id: user._id,
-                username: user.UserName,
-                email: user.EmailAddress
-            }
+            newUser: formatUserResponse(user)
         });
     }
     catch(err){
@@ -66,20 +78,25 @@ router.post("/login", async(req,res)=>{
                 _id: user._id,
                 email: user.EmailAddress,
                 isAdmin: user.isAdmin,
-                isCoordinator: user.isCoordinator
+                isCoordinator: user.isCoordinator,
+                role: user.isAdmin ? "admin" : user.isCoordinator ? "coordinator" : "user"
             },
             process.env.JWT_SECRET,
             {expiresIn: "30m"}
         );
 
+        const isProduction = process.env.NODE_ENV === "production";
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // development
-            sameSite: "lax",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
             maxAge: 30*60*1000
         });
 
-        res.status(200).json({message: "Login Successfully"});
+        res.status(200).json({
+            message: "Login Successfully",
+            user: formatUserResponse(user)
+        });
     }
     catch(err){
         console.error(err);
@@ -96,7 +113,7 @@ router.get("/me", authMiddleware, async(req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json(user);
+        res.status(200).json(formatUserResponse(user));
     }
     catch(err) {
         res.status(500).json({ message: "Internal Server Error" });

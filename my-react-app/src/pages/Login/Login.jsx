@@ -12,7 +12,8 @@ const Login = () => {
         EmailAddress: '',
         PhoneNumber: '',
         UserPassword: '',
-        ConfirmPassword: ''
+        ConfirmPassword: '',
+        role: 'user'
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -39,11 +40,11 @@ const Login = () => {
                     EmailAddress: formData.EmailAddress,
                     PhoneNumber: formData.PhoneNumber,
                     UserPassword: formData.UserPassword,
-                    isAdmin: false
+                    role: formData.role
                 });
             }
 
-            if (userData?.isAdmin) {
+            if (userData?.role === 'admin' || userData?.role === 'coordinator' || userData?.isAdmin || userData?.isCoordinator) {
                 navigate('/admin/dashboard');
             } else {
                 navigate('/profile');
@@ -119,6 +120,48 @@ const Login = () => {
                                         placeholder="1234567890"
                                         className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-sans"
                                     />
+                                </div>
+                            </div>
+                        )}
+
+                        {!isLogin && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <label
+                                        className={`flex items-center gap-3 rounded-xl border py-3 px-4 cursor-pointer transition-all ${
+                                            formData.role === 'user'
+                                                ? 'border-primary bg-primary/10 text-white'
+                                                : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="role"
+                                            value="user"
+                                            checked={formData.role === 'user'}
+                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                            className="h-4 w-4 text-primary bg-transparent border-white/20 focus:ring-primary/50"
+                                        />
+                                        <span className="text-sm font-semibold">User</span>
+                                    </label>
+                                    <label
+                                        className={`flex items-center gap-3 rounded-xl border py-3 px-4 cursor-pointer transition-all ${
+                                            formData.role === 'admin'
+                                                ? 'border-primary bg-primary/10 text-white'
+                                                : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="role"
+                                            value="admin"
+                                            checked={formData.role === 'admin'}
+                                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                            className="h-4 w-4 text-primary bg-transparent border-white/20 focus:ring-primary/50"
+                                        />
+                                        <span className="text-sm font-semibold">Admin</span>
+                                    </label>
                                 </div>
                             </div>
                         )}
