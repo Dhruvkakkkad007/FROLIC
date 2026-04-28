@@ -3,6 +3,18 @@ import { Mail, Lock, Github, User, Phone } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+const getAuthErrorMessage = (err, isLogin) => {
+    if (err?.response?.data?.message) {
+        return err.response.data.message;
+    }
+
+    if (err?.code === 'ERR_NETWORK') {
+        return 'Cannot connect to the server. Start the backend and try again.';
+    }
+
+    return `Failed to ${isLogin ? 'sign in' : 'sign up'}`;
+};
+
 const Login = () => {
     const { login, register } = useAuth();
     const navigate = useNavigate();
@@ -50,7 +62,7 @@ const Login = () => {
                 navigate('/profile');
             }
         } catch (err) {
-            setError(err.response?.data?.message || `Failed to ${isLogin ? 'sign in' : 'sign up'}`);
+            setError(getAuthErrorMessage(err, isLogin));
         } finally {
             setLoading(false);
         }

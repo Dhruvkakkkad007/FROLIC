@@ -23,7 +23,6 @@ const AddEvent = ({ isModal = false, onSuccess }) => {
         EventMainStudentCoOrdinatorPhone: '',
         EventMainStudentCoOrdinatorEmail: '',
         EventLocation: '',
-        EventLocation: '',
         MaxGroupsAllowed: 50,
         EventType: 'Technical',
         IsGroupEvent: false

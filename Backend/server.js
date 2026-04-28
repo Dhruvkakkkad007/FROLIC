@@ -9,7 +9,7 @@ const app=express();
 
 // Github - github.com/V-vidit/Frolic
 
-const allowedOrigins = (process.env.CLIENT_URLS || "http://localhost:5173,http://localhost:5174")
+const allowedOrigins = (process.env.CLIENT_URLS || "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
